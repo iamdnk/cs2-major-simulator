@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Major Swiss Simülatörü</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-layout">
+        <header>
+            <h1>CS2 MAJOR CHAMPIONSHIP</h1>
+            <p class="subtitle">Swiss Format & Canlı Espor Simülasyonu</p>
+        </header>
+
+        <!-- AŞAMA 1: TAKIM SEÇİMİ -->
+        <section id="team-selection-screen" class="panel">
+            <h2>Yöneteceğin Takımı Seç</h2>
+            <div class="pots-container">
+                <div class="pot-column">
+                    <h3 class="pot-title legends-title">⭐ Legends (1-8)</h3>
+                    <div id="legends-grid" class="teams-grid"></div>
+                </div>
+                <div class="pot-column">
+                    <h3 class="pot-title challengers-title">🔥 Challengers (9-16)</h3>
+                    <div id="challengers-grid" class="teams-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AŞAMA 2: TURNUVA EKRANI -->
+        <section id="tournament-screen" class="panel hidden">
+            <!-- Üst Bar -->
+            <div class="user-team-bar">
+                <div>
+                    <span>Takımın: <strong id="current-user-team"></strong></span>
+                    <span id="user-team-record" class="record-badge">0 - 0</span>
+                </div>
+                <div id="tournament-round-indicator" class="round-indicator">RAUNT 1</div>
+            </div>
+
+            <!-- Swiss Puan Durumu Tablosu -->
+            <div class="sub-panel">
+                <h3>Swiss Sıralaması (3G = Üst Tur | 3M = Elendi)</h3>
+                <div class="standings-table-container">
+                    <table class="standings-table">
+                        <thead>
+                            <tr>
+                                <th>Takım</th>
+                                <th>G</th>
+                                <th>M</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADIM A: TUR FİKSTÜRÜ VE SIRADAKİ RAKİP EKRANI -->
+            <div id="fixture-container" class="sub-panel">
+                <div class="next-match-banner">
+                    <p class="sub-lead">SIRADAKİ RAKİBİNİZ</p>
+                    <div class="banner-teams">
+                        <span id="fixture-user-team" class="banner-team-name"></span>
+                        <span class="vs-text">VS</span>
+                        <span id="fixture-opponent-team" class="banner-team-name"></span>
+                    </div>
+                    <button id="go-to-veto-btn" class="action-btn">Veto Aşamasına Geç</button>
+                </div>
+
+                <h4 class="section-title">Bu Turun Diğer Eşleşmeleri</h4>
+                <div id="round-fixtures-list" class="fixtures-grid"></div>
+            </div>
+
+            <!-- ADIM B: VETO (MAP BAN) AŞAMASI -->
+            <div id="veto-container" class="sub-panel hidden">
+                <div class="panel-header">
+                    <h3>Harita Veto Aşaması</h3>
+                    <span id="veto-turn-badge" class="badge">Sıra Bekleniyor...</span>
+                </div>
+                <p id="veto-status-text" class="status-box">Haritalar yükleniyor...</p>
+                <div id="map-pool-grid" class="map-grid"></div>
+            </div>
+
+            <!-- ADIM C: CANLI MAÇ (NSS TARZI) -->
+            <div id="match-live-container" class="sub-panel hidden">
+                <div class="live-match-header">
+                    <div class="team-side left">
+                        <h2 id="live-team-a">Team A</h2>
+                        <span id="live-team-a-map-stat" class="map-stat-text">%0</span>
+                    </div>
+                    <div class="live-score-box">
+                        <span id="live-score-a">0</span>
+                        <span class="colon">:</span>
+                        <span id="live-score-b">0</span>
+                    </div>
+                    <div class="team-side right">
+                        <h2 id="live-team-b">Team B</h2>
+                        <span id="live-team-b-map-stat" class="map-stat-text">%0</span>
+                    </div>
+                </div>
+                <div class="match-meta">
+                    <span id="live-map-badge" class="badge"></span>
+                </div>
+
+                <div class="ticker-box" id="ticker-log">
+                    <p class="ticker-placeholder">Maç başladığında raunt olayları burada akacak...</p>
+                </div>
+
+                <div class="live-btn-group">
+                    <button id="start-match-btn" class="action-btn">Canlı Maçı Başlat</button>
+                    <button id="fast-forward-btn" class="action-btn secondary-btn hidden">Hızlı Bitir</button>
+                </div>
+            </div>
+
+            <!-- ADIM D: TUR SONU VE TÜM SONUÇLAR -->
+            <div id="round-summary-container" class="sub-panel hidden">
+                <div id="tournament-end-banner" class="end-banner hidden">
+                    <h2 id="end-banner-title"></h2>
+                    <p id="end-banner-desc"></p>
+                    <button id="restart-tournament-btn" class="action-btn restart-btn">Turnuvayı Yeniden Başlat</button>
+                </div>
+
+                <div id="normal-summary-flow">
+                    <h3>Tur Sonuçları</h3>
+                    <div id="other-matches-list" class="fixtures-grid"></div>
+                    <button id="next-round-btn" class="action-btn">Sonraki Tura Geç</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

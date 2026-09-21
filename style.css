@@ -1,0 +1,439 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background-color: #0c0e12;
+    color: #f1f1f1;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.main-layout {
+    width: 100%;
+    max-width: 900px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #e49126;
+    letter-spacing: 3px;
+    font-size: 26px;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    color: #777d8a;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.panel {
+    background-color: #14171d;
+    border: 1px solid #222733;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+.sub-panel {
+    background-color: #1a1e27;
+    border: 1px solid #282f3d;
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 15px;
+}
+
+.sub-panel h3 {
+    color: #e49126;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    color: #aaa;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin: 15px 0 10px 0;
+}
+
+/* Torbalar (Pots) */
+.pots-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.pot-title {
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.legends-title { color: #ffd166; }
+.challengers-title { color: #06d6a0; }
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.team-card {
+    background-color: #212631;
+    border: 1px solid #2e3646;
+    border-radius: 5px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.team-card:hover {
+    transform: translateX(4px);
+    border-color: #e49126;
+    background-color: #282f3d;
+}
+
+.team-card h4 { font-size: 14px; }
+.team-card span { font-size: 12px; color: #8a92a3; }
+
+/* Swiss Tablosu */
+.standings-table-container {
+    max-height: 190px;
+    overflow-y: auto;
+}
+
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.standings-table th {
+    color: #8a92a3;
+    padding: 6px 10px;
+    border-bottom: 1px solid #282f3d;
+}
+
+.standings-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #1f242e;
+}
+
+.status-advanced { color: #06d6a0; font-weight: bold; }
+.status-eliminated { color: #e63946; font-weight: bold; }
+.status-active { color: #ffd166; }
+
+/* Sıradaki Rakip Bannerı */
+.next-match-banner {
+    background: linear-gradient(135deg, #1c222c, #11141a);
+    border: 1px solid #e49126;
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.sub-lead {
+    font-size: 12px;
+    color: #e49126;
+    letter-spacing: 2px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.banner-teams {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.vs-text {
+    color: #e49126;
+    font-size: 14px;
+}
+
+/* Fikstür Kartları Izgarası */
+.fixtures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.fixture-card {
+    background-color: #121419;
+    border: 1px solid #282f3d;
+    border-radius: 4px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.fixture-card.winner-a { border-left: 4px solid #06d6a0; }
+.fixture-card.winner-b { border-right: 4px solid #06d6a0; }
+
+.fixture-score {
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 0 8px;
+    color: #ffd166;
+}
+
+/* Harita Veto */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.status-box {
+    background-color: #121419;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #e49126;
+    border: 1px solid #282f3d;
+    margin-bottom: 10px;
+}
+
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+    gap: 8px;
+}
+
+.map-btn {
+    background-color: #222733;
+    border: 1px solid #333d4f;
+    color: #fff;
+    padding: 10px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.map-btn small {
+    display: block;
+    font-size: 10px;
+    color: #8a92a3;
+    margin-top: 4px;
+}
+
+.map-btn:hover:not(:disabled) {
+    background-color: #e63946;
+    border-color: #e63946;
+}
+
+.map-btn.banned {
+    background-color: #121419;
+    color: #444;
+    border-color: #1f242e;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+.map-btn.banned small { color: #333; }
+
+.map-btn.selected-map {
+    background-color: #06d6a0;
+    border-color: #06d6a0;
+    color: #000;
+}
+
+/* Canlı Maç Ekranı */
+.live-match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.team-side { flex: 1; }
+.team-side.left { text-align: right; }
+.team-side.right { text-align: left; }
+.team-side h2 { font-size: 18px; }
+.map-stat-text { font-size: 12px; color: #8a92a3; }
+
+.live-score-box {
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 0 20px;
+}
+
+.live-score-box .colon {
+    color: #e49126;
+    margin: 0 4px;
+}
+
+.match-meta {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    background: #121419;
+    border: 1px solid #333;
+}
+
+.record-badge {
+    background: #282f3d;
+    color: #ffd166;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.round-indicator {
+    font-weight: bold;
+    color: #e49126;
+    font-size: 14px;
+}
+
+/* Canlı Raunt Ticker Kutusu */
+.ticker-box {
+    background-color: #0e1014;
+    border: 1px solid #222733;
+    border-radius: 5px;
+    padding: 12px;
+    height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+}
+
+.ticker-placeholder {
+    color: #555;
+    text-align: center;
+    margin-top: 70px;
+}
+
+.ticker-row {
+    padding: 6px 8px;
+    border-radius: 3px;
+    background-color: #141820;
+    border-left: 4px solid #555;
+}
+
+.ticker-round-num { color: #e49126; font-weight: bold; margin-right: 6px; }
+.ticker-mvp { color: #ffd166; font-style: italic; margin-left: 6px; }
+
+/* Butonlar */
+.live-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    width: 100%;
+    background-color: #e49126;
+    color: #000;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover:not(:disabled) {
+    background-color: #f7a23b;
+}
+
+.action-btn:disabled {
+    background-color: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.secondary-btn {
+    background-color: #333a47;
+    color: #fff;
+}
+
+.secondary-btn:hover {
+    background-color: #414b5c;
+}
+
+/* Turnuva Bitiş Bannerı */
+.end-banner {
+    text-align: center;
+    padding: 25px;
+    border-radius: 6px;
+    background: #11141a;
+    border: 2px solid #e49126;
+    margin-bottom: 20px;
+}
+
+.end-banner h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.end-banner p {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.restart-btn {
+    background-color: #06d6a0;
+    color: #000;
+}
+
+.restart-btn:hover {
+    background-color: #05b386;
+}
+
+.user-team-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #282f3d;
+}
+
+.hidden { display: none !important; }
+.map-btn:disabled:not(.banned):not(.selected-map) {
+    opacity: 0.6;
+    cursor: wait;
+}
