@@ -3,53 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS2 Major Swiss Simülatörü</title>
+    <title>CS2 Major Championship</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="main-layout">
         <header>
-            <h1>CS2 MAJOR CHAMPIONSHIP</h1>
-            <p class="subtitle">Swiss Format & Canlı Espor Simülasyonu</p>
+            <h1 class="major-logo">CS2 MAJOR CHAMPIONSHIP</h1>
+            <p id="stage-subtitle" class="stage-tag">AŞAMA SEÇİMİ</p>
         </header>
 
-        <!-- AŞAMA 1: TAKIM SEÇİMİ -->
-        <section id="team-selection-screen" class="panel">
-            <h2>Yöneteceğin Takımı Seç</h2>
-            <div class="pots-container">
-                <div class="pot-column">
-                    <h3 class="pot-title legends-title">⭐ Legends (1-8)</h3>
-                    <div id="legends-grid" class="teams-grid"></div>
+        <!-- EKRAN 1: TAKIM SEÇİMİ -->
+        <section id="selection-screen" class="panel">
+            <div class="pots-grid">
+                <div class="pot-box">
+                    <div class="pot-badge badge-legends">LEGENDS</div>
+                    <div id="legends-list" class="team-cards-list"></div>
                 </div>
-                <div class="pot-column">
-                    <h3 class="pot-title challengers-title">🔥 Challengers (9-16)</h3>
-                    <div id="challengers-grid" class="teams-grid"></div>
+                <div class="pot-box">
+                    <div class="pot-badge badge-challengers">CHALLENGERS</div>
+                    <div id="challengers-list" class="team-cards-list"></div>
+                </div>
+                <div class="pot-box">
+                    <div class="pot-badge badge-contenders">CONTENDERS</div>
+                    <div id="contenders-list" class="team-cards-list"></div>
                 </div>
             </div>
         </section>
 
-        <!-- AŞAMA 2: TURNUVA EKRANI -->
+        <!-- EKRAN 2: TURNUVA ALANI -->
         <section id="tournament-screen" class="panel hidden">
-            <!-- Üst Bar -->
-            <div class="user-team-bar">
-                <div>
-                    <span>Takımın: <strong id="current-user-team"></strong></span>
-                    <span id="user-team-record" class="record-badge">0 - 0</span>
+            <!-- 1. GRUP AŞAMASI HUD BAR -->
+            <div id="swiss-hud-bar" class="hud-bar">
+                <div class="hud-side hud-left">
+                    <span id="user-team-name" class="team-title"></span>
+                    <span id="user-team-record" class="record-pill">0 - 0</span>
                 </div>
-                <div id="tournament-round-indicator" class="round-indicator">RAUNT 1</div>
+                <div class="hud-center">
+                    <span id="tournament-round-badge" class="round-pill">RAUNT 1</span>
+                </div>
+                <div class="hud-side hud-right">
+                    <span class="hud-label">RAKİP:</span>
+                    <span id="hud-opp-name" class="opp-title">-</span>
+                </div>
             </div>
 
-            <!-- Swiss Puan Durumu Tablosu -->
-            <div class="sub-panel">
-                <h3>Swiss Sıralaması (3G = Üst Tur | 3M = Elendi)</h3>
-                <div class="standings-table-container">
-                    <table class="standings-table">
+            <!-- 2. ELEME AŞAMASI ESPOR TV YAYIN SKORBANDI (YENİ!) -->
+            <div id="playoff-broadcast-hud" class="broadcast-hud hidden">
+                <div class="hud-bracket-wing wing-left">
+                    <div class="team-color-accent" id="user-color-accent"></div>
+                    <span id="bc-user-name" class="bc-team-name">TEAM A</span>
+                    <div id="bc-user-score" class="bc-score-box">0</div>
+                </div>
+                <div class="hud-center-meta">
+                    <span id="bc-stage-title" class="bc-stage-text">ÇEYREK FİNAL</span>
+                    <span id="bc-match-info" class="bc-info-pill">BO3 SERİSİ</span>
+                </div>
+                <div class="hud-bracket-wing wing-right">
+                    <div id="bc-opp-score" class="bc-score-box">0</div>
+                    <span id="bc-opp-name" class="bc-team-name">TEAM B</span>
+                    <div class="team-color-accent" id="opp-color-accent"></div>
+                </div>
+            </div>
+
+            <!-- Swiss Tablosu -->
+            <div id="swiss-view" class="sub-panel">
+                <div class="table-scroll">
+                    <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Takım</th>
+                                <th>#</th>
+                                <th>TAKIM</th>
                                 <th>G</th>
                                 <th>M</th>
-                                <th>Durum</th>
+                                <th>DURUM</th>
                             </tr>
                         </thead>
                         <tbody id="standings-body"></tbody>
@@ -57,80 +84,100 @@
                 </div>
             </div>
 
-            <!-- ADIM A: TUR FİKSTÜRÜ VE SIRADAKİ RAKİP EKRANI -->
-            <div id="fixture-container" class="sub-panel">
-                <div class="next-match-banner">
-                    <p class="sub-lead">SIRADAKİ RAKİBİNİZ</p>
-                    <div class="banner-teams">
-                        <span id="fixture-user-team" class="banner-team-name"></span>
-                        <span class="vs-text">VS</span>
-                        <span id="fixture-opponent-team" class="banner-team-name"></span>
+            <!-- PLAY-OFF AĞACI (ELEME EKRANI) -->
+            <div id="bracket-view" class="sub-panel hidden">
+                <div class="bracket-tree">
+                    <div class="bracket-col" id="bracket-qf">
+                        <div class="bracket-col-header">ÇEYREK FİNAL (BO3)</div>
+                        <div class="bracket-matches-col" id="qf-matches"></div>
                     </div>
-                    <button id="go-to-veto-btn" class="action-btn">Veto Aşamasına Geç</button>
-                </div>
-
-                <h4 class="section-title">Bu Turun Diğer Eşleşmeleri</h4>
-                <div id="round-fixtures-list" class="fixtures-grid"></div>
-            </div>
-
-            <!-- ADIM B: VETO (MAP BAN) AŞAMASI -->
-            <div id="veto-container" class="sub-panel hidden">
-                <div class="panel-header">
-                    <h3>Harita Veto Aşaması</h3>
-                    <span id="veto-turn-badge" class="badge">Sıra Bekleniyor...</span>
-                </div>
-                <p id="veto-status-text" class="status-box">Haritalar yükleniyor...</p>
-                <div id="map-pool-grid" class="map-grid"></div>
-            </div>
-
-            <!-- ADIM C: CANLI MAÇ (NSS TARZI) -->
-            <div id="match-live-container" class="sub-panel hidden">
-                <div class="live-match-header">
-                    <div class="team-side left">
-                        <h2 id="live-team-a">Team A</h2>
-                        <span id="live-team-a-map-stat" class="map-stat-text">%0</span>
+                    <div class="bracket-col" id="bracket-sf">
+                        <div class="bracket-col-header">YARI FİNAL (BO3)</div>
+                        <div class="bracket-matches-col" id="sf-matches"></div>
                     </div>
-                    <div class="live-score-box">
-                        <span id="live-score-a">0</span>
-                        <span class="colon">:</span>
-                        <span id="live-score-b">0</span>
+                    <div class="bracket-col" id="bracket-gf">
+                        <div class="bracket-col-header">BÜYÜK FİNAL (BO3)</div>
+                        <div class="bracket-matches-col" id="gf-matches"></div>
                     </div>
-                    <div class="team-side right">
-                        <h2 id="live-team-b">Team B</h2>
-                        <span id="live-team-b-map-stat" class="map-stat-text">%0</span>
+                    <div class="bracket-col" id="bracket-champ">
+                        <div class="bracket-col-header">ŞAMPİYON</div>
+                        <div class="champ-podium" id="champion-display">
+                            <div class="trophy-cup">🏆</div>
+                            <div id="champion-team-name">HENÜZ BELLİ DEĞİL</div>
+                        </div>
                     </div>
-                </div>
-                <div class="match-meta">
-                    <span id="live-map-badge" class="badge"></span>
-                </div>
-
-                <div class="ticker-box" id="ticker-log">
-                    <p class="ticker-placeholder">Maç başladığında raunt olayları burada akacak...</p>
-                </div>
-
-                <div class="live-btn-group">
-                    <button id="start-match-btn" class="action-btn">Canlı Maçı Başlat</button>
-                    <button id="fast-forward-btn" class="action-btn secondary-btn hidden">Hızlı Bitir</button>
                 </div>
             </div>
 
-            <!-- ADIM D: TUR SONU VE TÜM SONUÇLAR -->
-            <div id="round-summary-container" class="sub-panel hidden">
-                <div id="tournament-end-banner" class="end-banner hidden">
-                    <h2 id="end-banner-title"></h2>
-                    <p id="end-banner-desc"></p>
-                    <button id="restart-tournament-btn" class="action-btn restart-btn">Turnuvayı Yeniden Başlat</button>
+            <!-- FİKSTÜR -->
+            <div id="fixture-view" class="sub-panel">
+                <div class="match-banner">
+                    <div class="clash-row">
+                        <span id="banner-user" class="clash-team"></span>
+                        <span class="clash-vs">VS</span>
+                        <span id="banner-opp" class="clash-team"></span>
+                    </div>
+                    <button id="veto-start-btn" class="btn-action">Harita Vetosuna Başla</button>
                 </div>
+                <div class="sub-title">DİĞER EŞLEŞMELER</div>
+                <div id="fixture-cards-grid" class="cards-grid"></div>
+            </div>
 
-                <div id="normal-summary-flow">
-                    <h3>Tur Sonuçları</h3>
-                    <div id="other-matches-list" class="fixtures-grid"></div>
-                    <button id="next-round-btn" class="action-btn">Sonraki Tura Geç</button>
+            <!-- HARİTA VETO -->
+            <div id="veto-view" class="sub-panel hidden">
+                <div class="veto-header-strip">
+                    <span id="veto-stage-title" class="sub-title">HARİTA VETOSU</span>
+                    <span id="veto-turn-indicator" class="veto-badge">Bekleniyor</span>
+                </div>
+                <div id="veto-log" class="veto-status-bar">Veto başlatılıyor...</div>
+                <div id="map-pool-selection" class="maps-grid"></div>
+            </div>
+
+            <!-- CANLI MAÇ MOTORU -->
+            <div id="live-match-view" class="sub-panel hidden">
+                <div class="live-scoreboard">
+                    <div class="team-side team-left">
+                        <span id="sb-team-a">Team A</span>
+                    </div>
+                    <div class="score-core">
+                        <span id="sb-score-a">0</span>
+                        <span class="score-sep">:</span>
+                        <span id="sb-score-b">0</span>
+                    </div>
+                    <div class="team-side team-right">
+                        <span id="sb-team-b">Team B</span>
+                    </div>
+                </div>
+                <div class="match-tags">
+                    <span id="active-map-name" class="meta-tag">Harita: -</span>
+                </div>
+                <div id="ticker-feed" class="ticker-box"></div>
+                <div class="btn-group">
+                    <button id="live-play-btn" class="btn-action">Maçı Başlat</button>
+                    <button id="live-skip-btn" class="btn-secondary hidden">Hızlı Bitir</button>
+                </div>
+            </div>
+
+            <!-- TUR RAPORU & MODAL -->
+            <div id="summary-view" class="sub-panel hidden">
+                <div id="banner-modal" class="modal-card hidden">
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-description"></p>
+                    <div class="modal-btn-row">
+                        <button id="modal-btn" class="btn-action"></button>
+                        <button id="modal-sec-btn" class="btn-secondary hidden"></button>
+                    </div>
+                </div>
+                <div id="regular-summary">
+                    <div class="sub-title">KARŞILAŞMA SONUÇLARI</div>
+                    <div id="results-cards-grid" class="cards-grid"></div>
+                    <div class="btn-group">
+                        <button id="next-action-btn" class="btn-action mt-15">Sonraki Tura Geç</button>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>
