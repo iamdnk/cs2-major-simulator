@@ -38,7 +38,7 @@ Uygulama; saf JavaScript (Vanilla JS), anlamsal HTML5 ve espor standartlarına u
 ## Geliştirme Yol Haritası (Roadmap)
 
 * [x] Faz 1: Temel takım yönetimi, akıllı veto mekaniği, Swiss eşleştirme motoru ve canlı maç anlatımı.
-* [ ] Faz 2: 8 takımlı tekli eleme (Single Elimination) Play-off braketi ve Best-of-3 (BO3) serileri.
+* [x] Faz 2: 8 takımlı tekli eleme (Single Elimination) Play-off braketi ve Best-of-3 (BO3) serileri.
 * [ ] Faz 3: Genişletilmiş metin havuzu, ekonomi/satın alma mantığı ve oyuncu bazlı detay istatistikler.
 
 ---
