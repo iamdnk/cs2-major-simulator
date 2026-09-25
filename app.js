@@ -1,4 +1,4 @@
-// GÜNCEL 2026 EYLÜL TRANSFER SEZONU KADROLARI
+// GÜNCEL 2026 EYLÜL TRANSFER SEZONU KADROLARI (Güvenli ve Kararlı Motor)
 const DATABASE = [
     { id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", rating: 94, roster: ["Aleksib", "iM", "b1t", "w0nderful", "jL"], mapStats: { Mirage: 88, Inferno: 72, Nuke: 94, Ancient: 80, Anubis: 76, "Dust II": 86, Vertigo: 68 } },
     { id: 2, name: "Team Vitality", pot: "legends", color: "#ffd166", rating: 93, roster: ["apEX", "ZywOo", "flameZ", "ropz", "mezii"], mapStats: { Mirage: 84, Inferno: 95, Nuke: 88, Ancient: 78, Anubis: 92, "Dust II": 82, Vertigo: 65 } },
@@ -116,6 +116,7 @@ const dom = {
     fixtureView: document.getElementById("fixture-view"),
     bannerUser: document.getElementById("banner-user"),
     bannerOpp: document.getElementById("banner-opp"),
+    vetoStartBtn: document.getElementById("veto-start-btn"),
     fixtureCardsGrid: document.getElementById("fixture-cards-grid"),
     vetoView: document.getElementById("veto-view"),
     vetoTurn: document.getElementById("veto-turn-indicator"),
@@ -243,9 +244,10 @@ function showFixture() {
         div.innerHTML = `<span style="color:${m.teamA.color}">${m.teamA.name}</span> <span class="clash-vs">VS</span> <span style="color:${m.teamB.color}">${m.teamB.name}</span>`;
         dom.fixtureCardsGrid.appendChild(div);
     });
-
-    startVeto();
 }
+
+// BİLGİSAYARI KİLİTLEYEN HATA BURADAYDI, ARTIK DOM'DA BULUNUYOR VE ÇALIŞIYOR
+dom.vetoStartBtn.onclick = () => { startVeto(); };
 
 function calculateH2H(tA, tB, map) {
     let pA = Math.pow((tA.rating * 0.35) + (tA.mapStats[map] * 0.65), 3);
@@ -488,7 +490,6 @@ dom.livePlayBtn.onclick = () => {
         let winningRoster = (win === tA) ? currentRosterA : currentRosterB;
         let mvpPlayer = [...winningRoster].sort((a,b) => b.k - a.k)[0];
         
-        // GÜVENLİ VE HATASIZ SPİKER AKIŞI (Kilitlenmeleri önlemek için tamamen optimize edildi)
         let poolEvents = [...GENERAL_EVENTS];
         if (isEcoWin) poolEvents = poolEvents.concat(ECO_EVENTS);
         if (AWP_PLAYERS.includes(mvpPlayer.name)) poolEvents = poolEvents.concat(AWP_EVENTS);
@@ -752,12 +753,12 @@ async function animatePlayoffsStepByStep() {
     triggerConfetti(); openModal(`${playoffBracket.champ.name.toUpperCase()} ŞAMPİYON!`, `${playoffBracket.champ.name} büyük finali kazanarak CS2 Major Kupasını kaldırdı!`, "Başa Dön", () => location.reload());
 }
 
-function openModal(title, desc, btnText, callback, secBtnText = null, secCallback = null) {
+function openModal(title, desc, btnText, callback, secBtnTest = null, secCallback = null) {
     dom.regularSummary.classList.add("hidden"); dom.bannerModal.classList.remove("hidden"); dom.summaryView.classList.remove("hidden");
     if (title.includes("ŞAMPİYON")) { dom.modalTitle.className = "modal-champion-title"; let team = allTeams.find(t => title.includes(t.name.toUpperCase())); dom.modalTitle.style.color = team ? team.color : "#ffd166"; } 
     else { dom.modalTitle.className = ""; dom.modalTitle.style.color = "#f8fafc"; }
     dom.modalTitle.textContent = title; dom.modalDesc.textContent = desc; dom.modalBtn.textContent = btnText; dom.modalBtn.onclick = callback;
-    if (secBtnText) { dom.modalSecBtn.classList.remove("hidden"); dom.modalSecBtn.textContent = secBtnText; dom.modalSecBtn.onclick = secCallback; } 
+    if (secBtnTest) { dom.modalSecBtn.classList.remove("hidden"); dom.modalSecBtn.textContent = secBtnTest; dom.modalSecBtn.onclick = secCallback; } 
     else { dom.modalSecBtn.classList.add("hidden"); }
 }
 
