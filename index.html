@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS2 Major Championship</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=18">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
     <div id="confetti-container"></div>
@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <!-- FİKSTÜR -->
+                <!-- FİKSTÜR VE VETOYU BAŞLATMA -->
                 <div id="fixture-view" class="sub-panel">
                     <div class="match-banner">
                         <div class="clash-row">
@@ -62,7 +62,6 @@
                             <span class="clash-vs">VS</span>
                             <span id="banner-opp" class="clash-team"></span>
                         </div>
-                        <!-- SABİT KONUMDA BUTON -->
                         <div class="btn-group">
                             <button id="veto-start-btn" class="btn-action">Harita Vetosuna Başla</button>
                         </div>
@@ -122,14 +121,14 @@
                     </div>
                 </div>
 
-                <!-- TUR RAPORU (SABİT KONUMDA BUTON) -->
+                <!-- TUR RAPORU -->
                 <div id="summary-view" class="sub-panel hidden">
                     <div id="regular-summary">
-                        <div class="sub-title" id="summary-title">KARŞILAŞMA SONUÇLARI</div>
-                        <div id="results-cards-grid" class="cards-grid"></div>
-                        <div class="btn-group" style="margin-top: 15px;">
+                        <div class="sub-title" id="summary-title" style="margin-bottom: 8px;">KARŞILAŞMA SONUÇLARI</div>
+                        <div class="btn-group" style="margin-top: 0; margin-bottom: 16px;">
                             <button id="next-action-btn" class="btn-action">Sonraki Tura Geç</button>
                         </div>
+                        <div id="results-cards-grid" class="cards-grid"></div>
                     </div>
                 </div>
 
@@ -215,6 +214,6 @@
             </div>
         </div>
     </div>
-    <script src="app.js?v=18"></script>
+    <script src="app.js?v=22"></script>
 </body>
 </html>
