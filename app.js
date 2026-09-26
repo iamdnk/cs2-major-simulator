@@ -1,30 +1,39 @@
 // GÜNCEL 2026 EYLÜL TRANSFER SEZONU KADROLARI (Güvenli ve Kararlı Motor)
+// NOT: "tier" alanı takımın başlangıç prestij seviyesidir (eski "rating"). Artık gerçek "rating"
+// initApp() içinde her oyuncunun rolüne göre hesaplanan skill değerlerinin ORTALAMASINDAN dinamik
+// olarak üretiliyor. Yani reyting artık sabit değil, kadroya ve biraz da o günkü forma (varyansa) bağlı.
+// role: "igl" (az kill alır, oyunu yönetir), "awp" (round 5+ açılır), "star" (en yüksek frag potansiyeli), "rifler" (standart)
 const DATABASE = [
-    { id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", rating: 94, roster: ["Aleksib", "iM", "b1t", "w0nderful", "jL"], mapStats: { Mirage: 88, Inferno: 72, Nuke: 94, Ancient: 80, Anubis: 76, "Dust II": 86, Vertigo: 68 } },
-    { id: 2, name: "Team Vitality", pot: "legends", color: "#ffd166", rating: 93, roster: ["apEX", "ZywOo", "flameZ", "ropz", "mezii"], mapStats: { Mirage: 84, Inferno: 95, Nuke: 88, Ancient: 78, Anubis: 92, "Dust II": 82, Vertigo: 65 } },
-    { id: 3, name: "G2 Esports", pot: "legends", color: "#ffffff", rating: 92, roster: ["NiKo", "m0NESY", "huNter-", "malbsMd", "Snax"], mapStats: { Mirage: 85, Inferno: 91, Nuke: 78, Ancient: 88, Anubis: 84, "Dust II": 93, Vertigo: 62 } },
-    { id: 4, name: "Team Spirit", pot: "legends", color: "#e5e7eb", rating: 92, roster: ["chopper", "sh1ro", "donk", "zont1x", "magixx"], mapStats: { Mirage: 86, Inferno: 68, Nuke: 92, Ancient: 89, Anubis: 91, "Dust II": 95, Vertigo: 66 } },
-    { id: 5, name: "MOUZ", pot: "legends", color: "#d90429", rating: 90, roster: ["siuhy", "torzsi", "xertioN", "Jimpphat", "Brollan"], mapStats: { Mirage: 87, Inferno: 75, Nuke: 84, Ancient: 92, Anubis: 79, "Dust II": 72, Vertigo: 90 } },
-    { id: 6, name: "FaZe Clan", pot: "legends", color: "#e63946", rating: 89, roster: ["karrigan", "rain", "frozen", "broky", "device"], mapStats: { Mirage: 92, Inferno: 89, Nuke: 82, Ancient: 85, Anubis: 76, "Dust II": 78, Vertigo: 72 } },
-    { id: 7, name: "Eternal Fire", pot: "legends", color: "#38bdf8", rating: 88, roster: ["XANTARES", "woxic", "Wicadia", "Calyx", "Woro2k"], mapStats: { Mirage: 82, Inferno: 86, Nuke: 82, Ancient: 90, Anubis: 94, "Dust II": 88, Vertigo: 92 } },
-    { id: 8, name: "Heroic", pot: "legends", color: "#dc2626", rating: 87, roster: ["sjuush", "TeSeS", "NertZ", "degster", "kyxsan"], mapStats: { Mirage: 76, Inferno: 74, Nuke: 85, Ancient: 79, Anubis: 72, "Dust II": 68, Vertigo: 74 } },
-    { id: 9, name: "Astralis", pot: "challengers", color: "#ef4444", rating: 86, roster: ["stavn", "jabbi", "Staehr", "br0", "blameF"], mapStats: { Mirage: 78, Inferno: 82, Nuke: 91, Ancient: 72, Anubis: 70, "Dust II": 76, Vertigo: 70 } },
-    { id: 10, name: "Team Liquid", pot: "challengers", color: "#38bdf8", rating: 85, roster: ["Twistzz", "NAF", "YEKINDAR", "ultimate", "Jorko"], mapStats: { Mirage: 80, Inferno: 76, Nuke: 72, Ancient: 83, Anubis: 78, "Dust II": 85, Vertigo: 64 } },
-    { id: 11, name: "The MongolZ", pot: "challengers", color: "#facc15", rating: 85, roster: ["bLitz", "Techno", "Senzu", "mzinho", "910"], mapStats: { Mirage: 94, Inferno: 76, Nuke: 70, Ancient: 89, Anubis: 86, "Dust II": 83, Vertigo: 68 } },
-    { id: 12, name: "Complexity", pot: "challengers", color: "#60a5fa", rating: 84, roster: ["JT", "floppy", "grim", "EliGE", "hallzerk"], mapStats: { Mirage: 72, Inferno: 70, Nuke: 79, Ancient: 76, Anubis: 83, "Dust II": 70, Vertigo: 75 } },
-    { id: 13, name: "FURIA", pot: "challengers", color: "#f8fafc", rating: 84, roster: ["FalleN", "yuurih", "KSCERATO", "skullz", "exit"], mapStats: { Mirage: 70, Inferno: 75, Nuke: 79, Ancient: 72, Anubis: 68, "Dust II": 76, Vertigo: 82 } },
-    { id: 14, name: "Virtus.pro", pot: "challengers", color: "#f97316", rating: 83, roster: ["Jame", "FL1T", "fame", "n0rb3r7", "electroNic"], mapStats: { Mirage: 74, Inferno: 88, Nuke: 68, Ancient: 84, Anubis: 78, "Dust II": 84, Vertigo: 85 } },
-    { id: 15, name: "paiN Gaming", pot: "challengers", color: "#f87171", rating: 82, roster: ["biguzera", "nqz", "snow", "vsm", "piriajr"], mapStats: { Mirage: 68, Inferno: 74, Nuke: 72, Ancient: 64, Anubis: 70, "Dust II": 72, Vertigo: 84 } },
-    { id: 16, name: "BIG", pot: "challengers", color: "#d1d5db", rating: 81, roster: ["tabseN", "JDC", "faveN", "gr1ks", "blameF"], mapStats: { Mirage: 75, Inferno: 70, Nuke: 78, Ancient: 74, Anubis: 80, "Dust II": 82, Vertigo: 68 } }, 
-    { id: 17, name: "MIBR", pot: "contenders", color: "#a3e635", rating: 80, roster: ["drop", "brnz4n", "insani", "saffee", "exit"], mapStats: { Mirage: 72, Inferno: 70, Nuke: 75, Ancient: 68, Anubis: 70, "Dust II": 74, Vertigo: 76 } },
-    { id: 18, name: "NIP", pot: "contenders", color: "#d9f99d", rating: 79, roster: ["REZ", "maxster", "r1nkle", "n0te", "MisteM"], mapStats: { Mirage: 70, Inferno: 68, Nuke: 76, Ancient: 74, Anubis: 72, "Dust II": 66, Vertigo: 74 } },
-    { id: 19, name: "Aurora", pot: "contenders", color: "#2dd4bf", rating: 79, roster: ["MAJ3R", "Norwi", "Lack1", "KENSI", "r3salt"], mapStats: { Mirage: 70, Inferno: 66, Nuke: 83, Ancient: 73, Anubis: 71, "Dust II": 68, Vertigo: 82 } },
-    { id: 20, name: "FlyQuest", pot: "contenders", color: "#14b8a6", rating: 78, roster: ["dexter", "Vexite", "aliStair", "Liazz", "INS"], mapStats: { Mirage: 74, Inferno: 68, Nuke: 72, Ancient: 70, Anubis: 76, "Dust II": 65, Vertigo: 70 } },
-    { id: 21, name: "9z Team", pot: "contenders", color: "#8b5cf6", rating: 78, roster: ["max", "dgt", "MartinezSa", "buda", "HUASOPEEK"], mapStats: { Mirage: 76, Inferno: 72, Nuke: 78, Ancient: 75, Anubis: 74, "Dust II": 68, Vertigo: 62 } },
-    { id: 22, name: "Wildcard", pot: "contenders", color: "#ef4444", rating: 77, roster: ["stanislaw", "mhL", "reck", "HexT", "phzy"], mapStats: { Mirage: 75, Inferno: 70, Nuke: 74, Ancient: 72, Anubis: 78, "Dust II": 68, Vertigo: 66 } },
-    { id: 23, name: "ENCE", pot: "contenders", color: "#fdba74", rating: 76, roster: ["sdy", "podi", "Neityu", "F1KU", "kRaSnaL"], mapStats: { Mirage: 78, Inferno: 68, Nuke: 74, Ancient: 68, Anubis: 79, "Dust II": 66, Vertigo: 74 } },
-    { id: 24, name: "FUT Esports", pot: "contenders", color: "#e30f16", rating: 77, roster: ["xfl0ud", "Krabeni", "dem0n", "cmtry", "dziugss"], mapStats: { Mirage: 80, Inferno: 75, Nuke: 70, Ancient: 72, Anubis: 76, "Dust II": 74, Vertigo: 68 } }
+    { id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", tier: 94, roster: [{name:"Aleksib",role:"igl"},{name:"iM",role:"rifler"},{name:"b1t",role:"star"},{name:"w0nderful",role:"awp"},{name:"jL",role:"rifler"}], mapStats: { Mirage: 88, Inferno: 72, Nuke: 94, Ancient: 80, Anubis: 76, "Dust II": 86, Vertigo: 68 } },
+    { id: 2, name: "Team Vitality", pot: "legends", color: "#ffd166", tier: 93, roster: [{name:"apEX",role:"igl"},{name:"ZywOo",role:"star"},{name:"flameZ",role:"rifler"},{name:"ropz",role:"awp"},{name:"mezii",role:"rifler"}], mapStats: { Mirage: 84, Inferno: 95, Nuke: 88, Ancient: 78, Anubis: 92, "Dust II": 82, Vertigo: 65 } },
+    { id: 3, name: "G2 Esports", pot: "legends", color: "#ffffff", tier: 92, roster: [{name:"NiKo",role:"star"},{name:"m0NESY",role:"awp"},{name:"huNter-",role:"igl"},{name:"malbsMd",role:"rifler"},{name:"Snax",role:"rifler"}], mapStats: { Mirage: 85, Inferno: 91, Nuke: 78, Ancient: 88, Anubis: 84, "Dust II": 93, Vertigo: 62 } },
+    { id: 4, name: "Team Spirit", pot: "legends", color: "#e5e7eb", tier: 92, roster: [{name:"chopper",role:"igl"},{name:"sh1ro",role:"awp"},{name:"donk",role:"star"},{name:"zont1x",role:"rifler"},{name:"magixx",role:"rifler"}], mapStats: { Mirage: 86, Inferno: 68, Nuke: 92, Ancient: 89, Anubis: 91, "Dust II": 95, Vertigo: 66 } },
+    { id: 5, name: "MOUZ", pot: "legends", color: "#d90429", tier: 90, roster: [{name:"siuhy",role:"igl"},{name:"torzsi",role:"awp"},{name:"xertioN",role:"star"},{name:"Jimpphat",role:"rifler"},{name:"Brollan",role:"rifler"}], mapStats: { Mirage: 87, Inferno: 75, Nuke: 84, Ancient: 92, Anubis: 79, "Dust II": 72, Vertigo: 90 } },
+    { id: 6, name: "FaZe Clan", pot: "legends", color: "#e63946", tier: 89, roster: [{name:"karrigan",role:"igl"},{name:"rain",role:"rifler"},{name:"frozen",role:"rifler"},{name:"broky",role:"awp"},{name:"device",role:"star"}], mapStats: { Mirage: 92, Inferno: 89, Nuke: 82, Ancient: 85, Anubis: 76, "Dust II": 78, Vertigo: 72 } },
+    { id: 7, name: "Eternal Fire", pot: "legends", color: "#38bdf8", tier: 88, roster: [{name:"XANTARES",role:"star"},{name:"woxic",role:"awp"},{name:"Wicadia",role:"rifler"},{name:"Calyx",role:"igl"},{name:"Woro2k",role:"rifler"}], mapStats: { Mirage: 82, Inferno: 86, Nuke: 82, Ancient: 90, Anubis: 94, "Dust II": 88, Vertigo: 92 } },
+    { id: 8, name: "Heroic", pot: "legends", color: "#dc2626", tier: 87, roster: [{name:"sjuush",role:"igl"},{name:"TeSeS",role:"star"},{name:"NertZ",role:"awp"},{name:"degster",role:"star"},{name:"kyxsan",role:"rifler"}], mapStats: { Mirage: 76, Inferno: 74, Nuke: 85, Ancient: 79, Anubis: 72, "Dust II": 68, Vertigo: 74 } },
+    { id: 9, name: "Astralis", pot: "challengers", color: "#ef4444", tier: 86, roster: [{name:"stavn",role:"star"},{name:"jabbi",role:"rifler"},{name:"Staehr",role:"igl"},{name:"br0",role:"awp"},{name:"blameF",role:"rifler"}], mapStats: { Mirage: 78, Inferno: 82, Nuke: 91, Ancient: 72, Anubis: 70, "Dust II": 76, Vertigo: 70 } },
+    { id: 10, name: "Team Liquid", pot: "challengers", color: "#38bdf8", tier: 85, roster: [{name:"Twistzz",role:"star"},{name:"NAF",role:"star"},{name:"YEKINDAR",role:"rifler"},{name:"ultimate",role:"awp"},{name:"Jorko",role:"igl"}], mapStats: { Mirage: 80, Inferno: 76, Nuke: 72, Ancient: 83, Anubis: 78, "Dust II": 85, Vertigo: 64 } },
+    { id: 11, name: "The MongolZ", pot: "challengers", color: "#facc15", tier: 85, roster: [{name:"bLitz",role:"igl"},{name:"Techno",role:"awp"},{name:"Senzu",role:"star"},{name:"mzinho",role:"rifler"},{name:"910",role:"star"}], mapStats: { Mirage: 94, Inferno: 76, Nuke: 70, Ancient: 89, Anubis: 86, "Dust II": 83, Vertigo: 68 } },
+    { id: 12, name: "Complexity", pot: "challengers", color: "#60a5fa", tier: 84, roster: [{name:"JT",role:"igl"},{name:"floppy",role:"rifler"},{name:"grim",role:"rifler"},{name:"EliGE",role:"star"},{name:"hallzerk",role:"awp"}], mapStats: { Mirage: 72, Inferno: 70, Nuke: 79, Ancient: 76, Anubis: 83, "Dust II": 70, Vertigo: 75 } },
+    { id: 13, name: "FURIA", pot: "challengers", color: "#f8fafc", tier: 84, roster: [{name:"FalleN",role:"igl"},{name:"yuurih",role:"star"},{name:"KSCERATO",role:"star"},{name:"skullz",role:"rifler"},{name:"exit",role:"awp"}], mapStats: { Mirage: 70, Inferno: 75, Nuke: 79, Ancient: 72, Anubis: 68, "Dust II": 76, Vertigo: 82 } },
+    { id: 14, name: "Virtus.pro", pot: "challengers", color: "#f97316", tier: 83, roster: [{name:"Jame",role:"awp"},{name:"FL1T",role:"rifler"},{name:"fame",role:"star"},{name:"n0rb3r7",role:"igl"},{name:"electroNic",role:"star"}], mapStats: { Mirage: 74, Inferno: 88, Nuke: 68, Ancient: 84, Anubis: 78, "Dust II": 84, Vertigo: 85 } },
+    { id: 15, name: "paiN Gaming", pot: "challengers", color: "#f87171", tier: 82, roster: [{name:"biguzera",role:"igl"},{name:"nqz",role:"awp"},{name:"snow",role:"rifler"},{name:"vsm",role:"rifler"},{name:"piriajr",role:"star"}], mapStats: { Mirage: 68, Inferno: 74, Nuke: 72, Ancient: 64, Anubis: 70, "Dust II": 72, Vertigo: 84 } },
+    { id: 16, name: "BIG", pot: "challengers", color: "#d1d5db", tier: 81, roster: [{name:"tabseN",role:"igl"},{name:"JDC",role:"rifler"},{name:"faveN",role:"star"},{name:"gr1ks",role:"rifler"},{name:"blameF",role:"awp"}], mapStats: { Mirage: 75, Inferno: 70, Nuke: 78, Ancient: 74, Anubis: 80, "Dust II": 82, Vertigo: 68 } }, 
+    { id: 17, name: "MIBR", pot: "contenders", color: "#a3e635", tier: 80, roster: [{name:"drop",role:"igl"},{name:"brnz4n",role:"rifler"},{name:"insani",role:"star"},{name:"saffee",role:"awp"},{name:"exit",role:"rifler"}], mapStats: { Mirage: 72, Inferno: 70, Nuke: 75, Ancient: 68, Anubis: 70, "Dust II": 74, Vertigo: 76 } },
+    { id: 18, name: "NIP", pot: "contenders", color: "#d9f99d", tier: 79, roster: [{name:"REZ",role:"igl"},{name:"maxster",role:"star"},{name:"r1nkle",role:"awp"},{name:"n0te",role:"rifler"},{name:"MisteM",role:"rifler"}], mapStats: { Mirage: 70, Inferno: 68, Nuke: 76, Ancient: 74, Anubis: 72, "Dust II": 66, Vertigo: 74 } },
+    { id: 19, name: "Aurora", pot: "contenders", color: "#2dd4bf", tier: 79, roster: [{name:"MAJ3R",role:"igl"},{name:"Norwi",role:"rifler"},{name:"Lack1",role:"star"},{name:"KENSI",role:"rifler"},{name:"r3salt",role:"awp"}], mapStats: { Mirage: 70, Inferno: 66, Nuke: 83, Ancient: 73, Anubis: 71, "Dust II": 68, Vertigo: 82 } },
+    { id: 20, name: "FlyQuest", pot: "contenders", color: "#14b8a6", tier: 78, roster: [{name:"dexter",role:"igl"},{name:"Vexite",role:"rifler"},{name:"aliStair",role:"awp"},{name:"Liazz",role:"star"},{name:"INS",role:"rifler"}], mapStats: { Mirage: 74, Inferno: 68, Nuke: 72, Ancient: 70, Anubis: 76, "Dust II": 65, Vertigo: 70 } },
+    { id: 21, name: "9z Team", pot: "contenders", color: "#8b5cf6", tier: 78, roster: [{name:"max",role:"igl"},{name:"dgt",role:"rifler"},{name:"MartinezSa",role:"awp"},{name:"buda",role:"star"},{name:"HUASOPEEK",role:"rifler"}], mapStats: { Mirage: 76, Inferno: 72, Nuke: 78, Ancient: 75, Anubis: 74, "Dust II": 68, Vertigo: 62 } },
+    { id: 22, name: "Wildcard", pot: "contenders", color: "#ef4444", tier: 77, roster: [{name:"stanislaw",role:"igl"},{name:"mhL",role:"rifler"},{name:"reck",role:"star"},{name:"HexT",role:"rifler"},{name:"phzy",role:"awp"}], mapStats: { Mirage: 75, Inferno: 70, Nuke: 74, Ancient: 72, Anubis: 78, "Dust II": 68, Vertigo: 66 } },
+    { id: 23, name: "ENCE", pot: "contenders", color: "#fdba74", tier: 76, roster: [{name:"sdy",role:"star"},{name:"podi",role:"awp"},{name:"Neityu",role:"rifler"},{name:"F1KU",role:"rifler"},{name:"kRaSnaL",role:"igl"}], mapStats: { Mirage: 78, Inferno: 68, Nuke: 74, Ancient: 68, Anubis: 79, "Dust II": 66, Vertigo: 74 } },
+    { id: 24, name: "FUT Esports", pot: "contenders", color: "#e30f16", tier: 77, roster: [{name:"xfl0ud",role:"star"},{name:"Krabeni",role:"rifler"},{name:"dem0n",role:"rifler"},{name:"cmtry",role:"awp"},{name:"dziugss",role:"igl"}], mapStats: { Mirage: 80, Inferno: 75, Nuke: 70, Ancient: 72, Anubis: 76, "Dust II": 74, Vertigo: 68 } }
 ];
+
+// Rolün skill'e etkisi: IGL genelde daha düşük frag alır, Star ise en yüksek potansiyele sahiptir.
+const ROLE_MODIFIER = { igl: -10, awp: 2, star: 7, rifler: -2 };
+// Maç dengesi: bu sayı büyürse favoriler daha kesin kazanır, küçülürse sürpriz sonuç ihtimali artar.
+const MATCH_BALANCE_EXPONENT = 2;
 
 const MAP_THEMES = {
     "Mirage": "#d97706",
@@ -36,7 +45,6 @@ const MAP_THEMES = {
     "Vertigo": "#0ea5e9"
 };
 const MAP_POOL = Object.keys(MAP_THEMES);
-const AWP_PLAYERS = ["ZywOo", "m0NESY", "sh1ro", "torzsi", "broky", "woxic", "degster", "dev1ce", "ultimate", "910", "hallzerk", "FalleN", "Jame", "nqz", "syrsoN", "saffee", "r1nkle", "aliStair", "MartinezSa", "phzy", "podi", "cmtry", "w0nderful", "mhL", "Woro2k"];
 
 const GENERAL_EVENTS = [
     "{team} A sahasına hızlı sızarak kilidi açtı.",
@@ -82,6 +90,13 @@ let vetoStep = 0;
 
 let playoffBracket = { qf: [], sf: [], gf: [], champ: null };
 let currentPlayoffIndex = 0;
+
+let playedPairs = new Set();           // Swiss'te aynı iki takımın tekrar eşleşmesini engellemek için
+let tournamentPlayerStats = {};        // Turnuva boyunca (senin oynadığın maçlarda) her oyuncunun toplam K/D'si
+let seriesPlayerStats = {};            // Sadece o anki BO3 serisi için K/D (seri bitince MVP hesaplanır)
+let lastRosterA = [], lastRosterB = []; // Az önce biten maçın son kadro/skor tablosu (MVP hesaplamak için)
+let lastMatchMvp = null;
+let lastSeriesMvp = null;
 
 const dom = {
     selScreen: document.getElementById("selection-screen"),
@@ -161,6 +176,15 @@ dom.speedSelect.addEventListener("change", (e) => { currentSpeedMultiplier = par
 function initApp() {
     allTeams = JSON.parse(JSON.stringify(DATABASE));
     allTeams.forEach(t => {
+        // Her oyuncuya rolüne göre bir skill puanı veriyoruz (+ küçük rastgele varyans = "o günkü form").
+        // Takımın reytingi artık sabit değil: kadronun skill ortalamasından dinamik olarak çıkıyor.
+        t.roster = t.roster.map(p => {
+            let variance = Math.floor(Math.random() * 7) - 3; // -3 ile +3 arası günün formu
+            let skill = Math.max(40, Math.min(99, t.tier + (ROLE_MODIFIER[p.role] || 0) + variance));
+            return { name: p.name, role: p.role, skill: skill };
+        });
+        t.rating = Math.round(t.roster.reduce((sum, p) => sum + p.skill, 0) / t.roster.length);
+
         const item = document.createElement("div");
         item.className = "team-item";
         item.style.borderLeft = `3px solid ${t.color}`;
@@ -215,8 +239,7 @@ function runSwissRound() {
     
     currentMatches = [];
     Object.keys(groups).forEach(k => {
-        let arr = [...groups[k]].sort(() => Math.random() - 0.5);
-        while (arr.length >= 2) currentMatches.push({ teamA: arr.pop(), teamB: arr.pop(), scoreA: 0, scoreB: 0, map: "", resolved: false });
+        pairGroupAvoidingRepeats(groups[k]).forEach(([a, b]) => currentMatches.push({ teamA: a, teamB: b, scoreA: 0, scoreB: 0, map: "", resolved: false }));
     });
 
     activeUserMatch = currentMatches.find(m => m.teamA.id === userTeam.id || m.teamB.id === userTeam.id);
@@ -249,12 +272,72 @@ function showFixture() {
 // BİLGİSAYARI KİLİTLEYEN HATA BURADAYDI, ARTIK DOM'DA BULUNUYOR VE ÇALIŞIYOR
 dom.vetoStartBtn.onclick = () => { startVeto(); };
 
+// TEK MERKEZDEN KAZANMA İHTİMALİ HESABI: veto ekranındaki yüzdeler ile gerçek maç simülasyonu
+// artık HER ZAMAN aynı formülü kullanıyor (eskiden aynı formül 5 farklı yerde ayrı ayrı yazılıydı).
+function getMapWinProbability(tA, tB, map) {
+    let scoreA = (tA.rating * 0.35) + (tA.mapStats[map] * 0.65);
+    let scoreB = (tB.rating * 0.35) + (tB.mapStats[map] * 0.65);
+    let pA = Math.pow(scoreA, MATCH_BALANCE_EXPONENT), pB = Math.pow(scoreB, MATCH_BALANCE_EXPONENT);
+    return pA / (pA + pB);
+}
+function getTeamWinProbability(tA, tB) {
+    let pA = Math.pow(tA.rating, MATCH_BALANCE_EXPONENT), pB = Math.pow(tB.rating, MATCH_BALANCE_EXPONENT);
+    return pA / (pA + pB);
+}
+
 function calculateH2H(tA, tB, map) {
-    let pA = Math.pow((tA.rating * 0.35) + (tA.mapStats[map] * 0.65), 3);
-    let pB = Math.pow((tB.rating * 0.35) + (tB.mapStats[map] * 0.65), 3);
-    let pctA = Math.round((pA / (pA + pB)) * 100);
+    let pctA = Math.round(getMapWinProbability(tA, tB, map) * 100);
     return { pctA: pctA, pctB: 100 - pctA };
 }
+
+// --- SWISS'TE AYNI RAKİPLE TEKRAR EŞLEŞMEYİ ENGELLEME ---
+function pairKey(t1, t2) { return [t1.id, t2.id].sort((a, b) => a - b).join("-"); }
+function pairGroupAvoidingRepeats(arr) {
+    let shuffled = [...arr].sort(() => Math.random() - 0.5);
+    let used = new Array(shuffled.length).fill(false);
+    let pairs = [];
+    for (let i = 0; i < shuffled.length; i++) {
+        if (used[i]) continue;
+        used[i] = true;
+        let foundJ = -1;
+        for (let j = i + 1; j < shuffled.length; j++) {
+            if (used[j]) continue;
+            if (!playedPairs.has(pairKey(shuffled[i], shuffled[j]))) { foundJ = j; break; }
+        }
+        if (foundJ === -1) { for (let j = i + 1; j < shuffled.length; j++) { if (!used[j]) { foundJ = j; break; } } }
+        if (foundJ !== -1) { used[foundJ] = true; pairs.push([shuffled[i], shuffled[foundJ]]); }
+    }
+    return pairs;
+}
+
+// --- OYUNCU İSTATİSTİĞİ / MVP YARDIMCILARI ---
+function getMatchMVP(tA, rosterA, tB, rosterB) {
+    let all = rosterA.map(p => ({ name: p.name, kills: p.k, deaths: p.d, team: tA.name, color: tA.color }))
+        .concat(rosterB.map(p => ({ name: p.name, kills: p.k, deaths: p.d, team: tB.name, color: tB.color })));
+    all.sort((a, b) => b.kills - a.kills || a.deaths - b.deaths);
+    return all[0];
+}
+function recordPlayerStats(store, tA, rosterA, tB, rosterB) {
+    rosterA.forEach(p => {
+        let key = tA.name + "|" + p.name;
+        if (!store[key]) store[key] = { name: p.name, team: tA.name, color: tA.color, kills: 0, deaths: 0 };
+        store[key].kills += p.k; store[key].deaths += p.d;
+    });
+    rosterB.forEach(p => {
+        let key = tB.name + "|" + p.name;
+        if (!store[key]) store[key] = { name: p.name, team: tB.name, color: tB.color, kills: 0, deaths: 0 };
+        store[key].kills += p.k; store[key].deaths += p.d;
+    });
+}
+function getTopFromStore(store) {
+    let arr = Object.values(store);
+    if (arr.length === 0) return null;
+    arr.sort((a, b) => b.kills - a.kills || a.deaths - b.deaths);
+    return arr[0];
+}
+// NOT: modal açıklaması textContent ile basılıyor, o yüzden burada HTML etiketi KULLANMIYORUZ.
+function seriesMvpText(mvp) { return mvp ? ` 🏆 Serinin MVP'si: ${mvp.name} (${mvp.kills} kill) — ${mvp.team}.` : ""; }
+function tournamentMvpText(mvp) { return mvp ? ` 🎖️ Turnuvandaki en golcü oyuncun: ${mvp.name} (${mvp.kills} kill, ${mvp.deaths} ölüm) — ${mvp.team}.` : ""; }
 
 function setVetoLog(text, isUserTurn = false, actionType = "") {
     if (!isUserTurn) {
@@ -390,12 +473,29 @@ function renderScoreboard(tA, rosterA, tB, rosterB, sA, sB) {
     sortedB.forEach((p, idx) => { let mvpClass = (sB >= 13 && sB > sA && idx === 0) ? 'class="mvp-row"' : ''; dom.tblBodyB.innerHTML += `<tr ${mvpClass}><td>${p.name}</td><td>${p.k}</td><td>${p.d}</td></tr>`; });
 }
 
-function distributeStats(winRoster, loseRoster) {
+// Bir oyuncunun o round'da kill alma "ağırlığını" hesaplıyoruz.
+// IGL daha az kill alır (oyunu yönetir), Star oyuncu daha çok alır,
+// AWP'ci ise ilk 4 round'da (pistol/eco dönemi) geride kalıp round 5'ten sonra açılır.
+function getPlayerWeight(p, roundNumber) {
+    let w = p.skill || 75;
+    if (p.role === "igl") w *= 0.55;
+    if (p.role === "star") w *= 1.25;
+    if (p.role === "awp") w *= (roundNumber <= 4 ? 0.7 : 1.2);
+    return Math.max(w, 5);
+}
+function weightedPick(roster, roundNumber) {
+    let weights = roster.map(p => getPlayerWeight(p, roundNumber));
+    let total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < roster.length; i++) { r -= weights[i]; if (r <= 0) return roster[i]; }
+    return roster[roster.length - 1];
+}
+function distributeStats(winRoster, loseRoster, roundNumber) {
     loseRoster.forEach(p => { if(Math.random() > 0.1) p.d++; }); 
     let killsToGive = 4 + Math.floor(Math.random() * 2); 
-    for(let i=0; i<killsToGive; i++) winRoster[Math.floor(Math.random() * 5)].k++;
+    for(let i=0; i<killsToGive; i++) weightedPick(winRoster, roundNumber).k++;
     let loseKills = Math.floor(Math.random() * 4);
-    for(let i=0; i<loseKills; i++) { loseRoster[Math.floor(Math.random() * 5)].k++; winRoster[Math.floor(Math.random() * 5)].d++; }
+    for(let i=0; i<loseKills; i++) { weightedPick(loseRoster, roundNumber).k++; weightedPick(winRoster, roundNumber).d++; }
 }
 
 function updateEconomy(ecoWin, ecoLose) { ecoWin.money += 3250; ecoWin.lossStreak = 0; ecoLose.lossStreak++; ecoLose.money += 1400 + (Math.min(ecoLose.lossStreak - 1, 4) * 500); }
@@ -427,8 +527,8 @@ function startLiveMatch() {
         dom.liveStatsArea.classList.remove("hidden");
         dom.ecoTeamA.textContent = "TABANCA"; dom.ecoTeamA.style.color = "#cbd5e1"; dom.ecoTeamB.textContent = "TABANCA"; dom.ecoTeamB.style.color = "#cbd5e1";
         
-        let initRosterA = tA.roster.map(p => ({ name: p, k: 0, d: 0 })); 
-        let initRosterB = tB.roster.map(p => ({ name: p, k: 0, d: 0 }));
+        let initRosterA = tA.roster.map(p => ({ name: p.name, role: p.role, skill: p.skill, k: 0, d: 0 })); 
+        let initRosterB = tB.roster.map(p => ({ name: p.name, role: p.role, skill: p.skill, k: 0, d: 0 }));
         renderScoreboard(tA, initRosterA, tB, initRosterB, 0, 0);
 
         if (isBo3Match) updatePlayoffBroadcastHUD();
@@ -456,9 +556,12 @@ dom.livePlayBtn.onclick = () => {
     dom.liveSkipBtn.disabled = false; dom.liveSkipBtn.classList.remove("hidden"); dom.tickerFeed.innerHTML = "";
 
     let tA = isBo3Match ? userTeam : activeUserMatch.teamA, tB = isBo3Match ? opponentTeam : activeUserMatch.teamB;
-    let currentRosterA = tA.roster.map(p => ({ name: p, k: 0, d: 0 })), currentRosterB = tB.roster.map(p => ({ name: p, k: 0, d: 0 }));
+    let currentRosterA = tA.roster.map(p => ({ name: p.name, role: p.role, skill: p.skill, k: 0, d: 0 })), currentRosterB = tB.roster.map(p => ({ name: p.name, role: p.role, skill: p.skill, k: 0, d: 0 }));
     let ecoA = { money: 800, lossStreak: 0 }, ecoB = { money: 800, lossStreak: 0 };
-    let pA = Math.pow((tA.rating*0.35)+(tA.mapStats[chosenMap]*0.65), 3), pB = Math.pow((tB.rating*0.35)+(tB.mapStats[chosenMap]*0.65), 3), prob = pA / (pA + pB);
+    let prob = getMapWinProbability(tA, tB, chosenMap);
+    // Ekonominin round kazanma ihtimeline etkisi: eco/force buy yapan takım o round'u kazanma
+    // şansını gerçekten kaybediyor artık (eskiden ekonomi sadece görsel bir etiketti).
+    const BUY_STRENGTH = { "TABANCA": 1, "ECO": 0.72, "FORCE BUY": 0.87, "FULL BUY": 1 };
     let sA = 0, sB = 0, r = 1, target = 13; matchIsRunning = true;
 
     function playRound() {
@@ -473,15 +576,18 @@ dom.livePlayBtn.onclick = () => {
             dom.ecoTeamA.textContent = stateA.text; dom.ecoTeamA.style.color = stateA.color; dom.ecoTeamB.textContent = stateB.text; dom.ecoTeamB.style.color = stateB.color;
         }
 
-        let win = Math.random() < prob ? tA : tB, loser = (win === tA) ? tB : tA;
+        let stA = BUY_STRENGTH[dom.ecoTeamA.textContent] ?? 1, stB = BUY_STRENGTH[dom.ecoTeamB.textContent] ?? 1;
+        let adjA = prob * stA, adjB = (1 - prob) * stB;
+        let roundProbA = adjA / (adjA + adjB);
+        let win = Math.random() < roundProbA ? tA : tB, loser = (win === tA) ? tB : tA;
         let isEcoWin = false;
         
         if (win === tA) { 
             if (dom.ecoTeamA.textContent === "ECO" && dom.ecoTeamB.textContent === "FULL BUY") isEcoWin = true;
-            sA++; distributeStats(currentRosterA, currentRosterB); updateEconomy(ecoA, ecoB); 
+            sA++; distributeStats(currentRosterA, currentRosterB, r); updateEconomy(ecoA, ecoB); 
         } else { 
             if (dom.ecoTeamB.textContent === "ECO" && dom.ecoTeamA.textContent === "FULL BUY") isEcoWin = true;
-            sB++; distributeStats(currentRosterB, currentRosterA); updateEconomy(ecoB, ecoA); 
+            sB++; distributeStats(currentRosterB, currentRosterA, r); updateEconomy(ecoB, ecoA); 
         }
 
         dom.sbScoreA.textContent = sA; dom.sbScoreB.textContent = sB;
@@ -492,7 +598,7 @@ dom.livePlayBtn.onclick = () => {
         
         let poolEvents = [...GENERAL_EVENTS];
         if (isEcoWin) poolEvents = poolEvents.concat(ECO_EVENTS);
-        if (AWP_PLAYERS.includes(mvpPlayer.name)) poolEvents = poolEvents.concat(AWP_EVENTS);
+        if (mvpPlayer.role === "awp" && r > 4) poolEvents = poolEvents.concat(AWP_EVENTS);
 
         let ev = poolEvents[Math.floor(Math.random()*poolEvents.length)]
                     .replace("{player}", mvpPlayer.name)
@@ -507,7 +613,8 @@ dom.livePlayBtn.onclick = () => {
         }
 
         if (sA === target || sB === target) {
-            matchIsRunning = false; dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden"); return;
+            matchIsRunning = false; lastRosterA = currentRosterA; lastRosterB = currentRosterB;
+            dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden"); return;
         }
         r++; let baseDelay = 1100; matchTimer = setTimeout(playRound, baseDelay / currentSpeedMultiplier);
     }
@@ -516,17 +623,26 @@ dom.livePlayBtn.onclick = () => {
     dom.liveSkipBtn.onclick = () => {
         if (!matchIsRunning) return;
         matchIsRunning = false; clearTimeout(matchTimer);
+        let rr = r;
         while (sA < target && sB < target) {
             let fastWin = Math.random() < prob ? tA : tB;
-            if (fastWin === tA) { sA++; distributeStats(currentRosterA, currentRosterB); } else { sB++; distributeStats(currentRosterB, currentRosterA); }
+            if (fastWin === tA) { sA++; distributeStats(currentRosterA, currentRosterB, rr); } else { sB++; distributeStats(currentRosterB, currentRosterA, rr); }
             if (sA === target - 1 && sB === target - 1) target += 3;
+            rr++;
         }
+        lastRosterA = currentRosterA; lastRosterB = currentRosterB;
         dom.sbScoreA.textContent = sA; dom.sbScoreB.textContent = sB; renderScoreboard(tA, currentRosterA, tB, currentRosterB, sA, sB);
         dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden");
     };
 };
 
 function onMatchFinished(sA, sB) {
+    let tA = isBo3Match ? userTeam : activeUserMatch.teamA;
+    let tB = isBo3Match ? opponentTeam : activeUserMatch.teamB;
+    recordPlayerStats(tournamentPlayerStats, tA, lastRosterA, tB, lastRosterB);
+    if (isBo3Match) recordPlayerStats(seriesPlayerStats, tA, lastRosterA, tB, lastRosterB);
+    lastMatchMvp = getMatchMVP(tA, lastRosterA, tB, lastRosterB);
+
     if (isBo3Match) {
         if (sA > sB) bo3UserWins++; else bo3OppWins++; updatePlayoffBroadcastHUD();
         if (bo3UserWins === 2 || bo3OppWins === 2) { let userWon = bo3UserWins === 2; onBo3SeriesResolved(userWon); } 
@@ -535,6 +651,7 @@ function onMatchFinished(sA, sB) {
     
     activeUserMatch.scoreA = sA; activeUserMatch.scoreB = sB; activeUserMatch.map = chosenMap;
     if (sA > sB) { activeUserMatch.teamA.wins++; activeUserMatch.teamB.losses++; } else { activeUserMatch.teamB.wins++; activeUserMatch.teamA.losses++; }
+    playedPairs.add(pairKey(activeUserMatch.teamA, activeUserMatch.teamB));
     
     simulateOtherMatchesInstantly(); 
     updateUserBadge(); 
@@ -545,10 +662,11 @@ function onMatchFinished(sA, sB) {
 function simulateOtherMatchesInstantly() {
     currentMatches.filter(m => m !== activeUserMatch).forEach(m => {
         let map = MAP_POOL[Math.floor(Math.random()*MAP_POOL.length)];
-        let pA = Math.pow((m.teamA.rating*0.35)+(m.teamA.mapStats[map]*0.65), 3), pB = Math.pow((m.teamB.rating*0.35)+(m.teamB.mapStats[map]*0.65), 3), prob = pA / (pA + pB);
+        let prob = getMapWinProbability(m.teamA, m.teamB, map);
         let sA = 0, sB = 0, target = 13; while (sA < target && sB < target) { if (Math.random() < prob) sA++; else sB++; if (sA === target - 1 && sB === target - 1) target += 3; }
         m.scoreA = sA; m.scoreB = sB; m.map = map;
         if (sA > sB) { m.teamA.wins++; m.teamB.losses++; } else { m.teamB.wins++; m.teamA.losses++; }
+        playedPairs.add(pairKey(m.teamA, m.teamB));
     });
 }
 
@@ -557,6 +675,13 @@ function showSummary() {
     dom.summaryView.classList.remove("hidden"); 
     dom.swissView.classList.remove("hidden");
     dom.summaryTitle.textContent = "KARŞILAŞMA SONUÇLARI";
+    let mvpLine = document.getElementById("mvp-line");
+    if (!mvpLine) {
+        mvpLine = document.createElement("div"); mvpLine.id = "mvp-line";
+        mvpLine.style.cssText = "font-size:12px; color:#94a3b8; margin-bottom:12px; font-weight:700;";
+        dom.summaryTitle.insertAdjacentElement("afterend", mvpLine);
+    }
+    mvpLine.innerHTML = lastMatchMvp ? `🏆 Maç MVP: <strong style="color:${lastMatchMvp.color}">${lastMatchMvp.name}</strong> (${lastMatchMvp.kills} kill, ${lastMatchMvp.deaths} ölüm) — ${lastMatchMvp.team}` : "";
     dom.resultsGrid.innerHTML = "";
     
     currentMatches.forEach(m => {
@@ -575,7 +700,7 @@ function checkStageEnd() {
 
     if (userElim) {
         dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden"); dom.swissLayout.classList.add("hidden");
-        openModal("ELENDİNİZ", `${userTeam.name} 3 mağlubiyet alarak turnuvaya veda etti.`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
+        openModal("ELENDİNİZ", `${userTeam.name} 3 mağlubiyet alarak turnuvaya veda etti.${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
     }
     if (userAdv) {
         finishSwissStage(stageTeams, currentStage === 1 ? "adv_opening" : "adv_playoffs", currentStage === 1 ? "elm_opening" : "elm_playoffs");
@@ -601,8 +726,7 @@ function drawNextRoundPairings() {
     
     currentMatches = [];
     Object.keys(groups).forEach(k => {
-        let arr = [...groups[k]].sort(() => Math.random() - 0.5);
-        while (arr.length >= 2) currentMatches.push({ teamA: arr.pop(), teamB: arr.pop(), scoreA: 0, scoreB: 0, map: "" });
+        pairGroupAvoidingRepeats(groups[k]).forEach(([a, b]) => currentMatches.push({ teamA: a, teamB: b, scoreA: 0, scoreB: 0, map: "" }));
     });
 
     activeUserMatch = currentMatches.find(m => m.teamA.id === userTeam.id || m.teamB.id === userTeam.id);
@@ -622,7 +746,7 @@ function finishSwissStage(pool, advStatus, elmStatus) {
         let active = pool.filter(t => t.wins < 3 && t.losses < 3); if (active.length < 2) break;
         active.sort((a, b) => (b.wins - b.losses) - (a.wins - a.losses) || (Math.random() - 0.5));
         for (let i = 0; i < active.length - 1; i += 2) {
-            let tA = active[i], tB = active[i + 1], pA = Math.pow(tA.rating, 3) / (Math.pow(tA.rating, 3) + Math.pow(tB.rating, 3));
+            let tA = active[i], tB = active[i + 1], pA = getTeamWinProbability(tA, tB);
             if (Math.random() < pA) { tA.wins++; tB.losses++; } else { tB.wins++; tA.losses++; }
         } safetyCounter--;
     }
@@ -676,14 +800,14 @@ function prepareNextPlayoffUserMatch(roundKey) {
     else if (roundKey === "gf") match = playoffBracket.gf[0];
     if (!match) return;
     opponentTeam = match.t1.id === userTeam.id ? match.t2 : match.t1;
-    bo3UserWins = 0; bo3OppWins = 0; chosenMap = null; updatePlayoffBroadcastHUD();
+    bo3UserWins = 0; bo3OppWins = 0; seriesPlayerStats = {}; chosenMap = null; updatePlayoffBroadcastHUD();
     let stageName = roundKey === "qf" ? "ÇEYREK FİNAL" : (roundKey === "sf" ? "YARI FİNAL" : "BÜYÜK FİNAL");
-    openModal(`${stageName} (BO3)`, `${userTeam.name} vs ${opponentTeam.name}`, "Harita Vetosuna Başla", () => { closeModal(); dom.bracketView.classList.add("hidden"); dom.swissLayout.classList.remove("hidden"); startVeto(); });
+    openModal(`${stageName} (BO3)`, `${userTeam.name} vs ${opponentTeam.name}${seriesMvpText(lastSeriesMvp)}`, "Harita Vetosuna Başla", () => { closeModal(); dom.bracketView.classList.add("hidden"); dom.swissLayout.classList.remove("hidden"); startVeto(); });
 }
 
 function simBo3Between(tA, tB) {
     if (!tA || !tB) return { winner: tA || tB || { name: "Bilinmeyen", color: "#fff" }, s1: 2, s2: 0 };
-    let pA = Math.pow(tA.rating, 3) / (Math.pow(tA.rating, 3) + Math.pow(tB.rating, 3)), wA = 0, wB = 0;
+    let pA = getTeamWinProbability(tA, tB), wA = 0, wB = 0;
     while (wA < 2 && wB < 2) { if (Math.random() < pA) wA++; else wB++; } return { winner: wA === 2 ? tA : tB, s1: wA, s2: wB };
 }
 
@@ -698,18 +822,19 @@ function triggerConfetti() {
 }
 
 function onBo3SeriesResolved(userWon) {
+    lastSeriesMvp = getTopFromStore(seriesPlayerStats);
     dom.liveView.classList.add("hidden"); dom.swissLayout.classList.add("hidden"); dom.bracketView.classList.remove("hidden");
     if (!userWon) {
         dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden");
         if (currentPlayoffIndex === 2) {
             playoffBracket.gf[0].winner = opponentTeam; playoffBracket.gf[0].s1 = playoffBracket.gf[0].t1.id === opponentTeam.id ? 2 : bo3UserWins; playoffBracket.gf[0].s2 = playoffBracket.gf[0].t2.id === opponentTeam.id ? 2 : bo3UserWins;
             playoffBracket.champ = opponentTeam; renderBracketTree(); triggerConfetti();
-            openModal(`${opponentTeam.name.toUpperCase()} ŞAMPİYON!`, `${opponentTeam.name} büyük final serisini ${bo3OppWins}-${bo3UserWins} kazanarak Major Şampiyonu oldu!`, "Yeniden Başlat", () => location.reload()); return;
+            openModal(`${opponentTeam.name.toUpperCase()} ŞAMPİYON!`, `${opponentTeam.name} büyük final serisini ${bo3OppWins}-${bo3UserWins} kazanarak Major Şampiyonu oldu!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload()); return;
         }
         if (currentPlayoffIndex === 0) { let userQF = playoffBracket.qf.find(m => m.t1.id === userTeam.id || m.t2.id === userTeam.id); userQF.winner = opponentTeam; userQF.s1 = userQF.t1.id === opponentTeam.id ? 2 : bo3UserWins; userQF.s2 = userQF.t2.id === opponentTeam.id ? 2 : bo3UserWins; }
         else if (currentPlayoffIndex === 1) { let userSF = playoffBracket.sf.find(m => m.t1 && m.t2 && (m.t1.id === userTeam.id || m.t2.id === userTeam.id)); userSF.winner = opponentTeam; userSF.s1 = userSF.t1.id === opponentTeam.id ? 2 : bo3UserWins; userSF.s2 = userSF.t2.id === opponentTeam.id ? 2 : bo3UserWins; }
         renderBracketTree(); let stageTxt = currentPlayoffIndex === 0 ? "Çeyrek finalde" : "Yarı finalde";
-        openModal("ELENDİNİZ", `${stageTxt} ${opponentTeam.name} takımına mağlup oldunuz.`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
+        openModal("ELENDİNİZ", `${stageTxt} ${opponentTeam.name} takımına mağlup oldunuz.${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
     }
     if (currentPlayoffIndex === 0) {
         let userQF = playoffBracket.qf.find(m => m.t1.id === userTeam.id || m.t2.id === userTeam.id); userQF.winner = userTeam; userQF.s1 = userQF.t1.id === userTeam.id ? 2 : bo3OppWins; userQF.s2 = userQF.t2.id === userTeam.id ? 2 : bo3OppWins;
@@ -723,7 +848,7 @@ function onBo3SeriesResolved(userWon) {
     } else if (currentPlayoffIndex === 2) {
         dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden"); dom.swissLayout.classList.add("hidden");
         playoffBracket.gf[0].winner = userTeam; playoffBracket.gf[0].s1 = 2; playoffBracket.gf[0].s2 = bo3OppWins; playoffBracket.champ = userTeam; renderBracketTree(); triggerConfetti();
-        openModal(`${userTeam.name.toUpperCase()} ŞAMPİYON!`, `Muazzam bir performansla CS2 Major Kupasını müzenize götürdünüz! Tebrikler!`, "Yeniden Başlat", () => location.reload());
+        openModal(`${userTeam.name.toUpperCase()} ŞAMPİYON!`, `Muazzam bir performansla CS2 Major Kupasını müzenize götürdünüz! Tebrikler!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload());
     }
 }
 
