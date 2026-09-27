@@ -1,38 +1,97 @@
-# 🏆 CS2 Major Championship Simulator
+# CS2 Major Championship Simulator
 
-Gerçekçi espor turnuva mekaniklerine, Valve'ın resmi Major kurallarına ve dinamik simülasyon algoritmalarına dayalı **CS2 Turnuva Simülatörü**. Tamamen harici kütüphane kullanılmadan (Vanilla JS, CSS3, HTML5) geliştirilmiştir.
+Counter-Strike 2'nin gerçek Major turnuva formatını (Challengers → Legends → Play-off) baz alan, tamamen tarayıcıda çalışan bir turnuva simülatörü. Takımını seç, rakiplerle harita vetosu yap, maçı round round izle, Swiss (İsviçre) formatında ilerle, play-off'ta elenme usulü braket ile şampiyonluğa uzan.
 
-🔗 **Canlı Demo:** [https://iamdnk.github.io/cs2-major-simulator/](https://iamdnk.github.io/cs2-major-simulator/)
-
----
-
-## 📌 Öne Çıkan Özellikler
-
-* **Resmi 24 Takımlı Major Yapısı:**
-* **Opening Stage:** Contenders ve Challengers takımlarının mücadele ettiği 16 takımlı Swiss aşaması.
-* **Legends Stage:** Bekleyen 8 Legends takımı ile Opening'den çıkan 8 takımın karşılaştığı ikinci Swiss aşaması.
-* **Champions Stage (Play-off):** Kalan 8 takımın karşılaştığı tekli eleme (Single Elimination) ağacı.
-* **MR3 Overtime (Uzatma) Motoru:** Maçlar 12-12 eşitlendiğinde standart CS2 uzatma kuralı devreye girer (Hedef skor 16, 19, 22 şeklinde dinamik uzar).
-* **Dinamik Kafa Kafaya (H2H) Harita Matematiği:** Takımların harita reytingleri ve genel güçleri kübik çarpanla ($Rating^3$) karşılaştırılarak her harita için gerçekçi kazanma olasılıkları hesaplanır.
-* **Resmi BO3 Veto (Pick & Ban) Sistemi:** Play-off aşamasında takımlar resmi sıra ile harita eler ve seçer: *Ban ➔ Ban ➔ Pick ➔ Pick ➔ Ban ➔ Ban ➔ Decider*.
-* **Espor TV Yayın Skorbandı (Broadcast Scorebug):** BLAST Premier ve UEFA yayın standartlarından esinlenen, takım renklerine duyarlı açılı skor paneli.
-* **Gözlemci / Adım Adım Simülasyon:** Turnuvadan erken elenildiğinde kalan maçların eleme ağacı üzerinde adım adım, animasyonlu biçimde simüle edilmesini sağlayan akış.
+**Canlı demo:** `index.html` dosyasını herhangi bir tarayıcıda açman yeterli. Kurulum, derleme, bağımlılık yok — saf HTML/CSS/JavaScript.
 
 ---
 
-## 🛠️ Teknolojiler
+## Özellikler
 
-* **HTML5:** Anlamsal (semantic) arayüz mimarisi.
-* **CSS3:** Modern espor/karanlık tema, Flexbox, CSS Grid, animasyonlar ve neon vurgular.
-* **Vanilla JavaScript (ES6+):** Asenkron durum yönetimi (Async/Await), simülasyon olasılık motoru ve dinamik DOM manipülasyonu.
+### Turnuva formatı
+- **Challengers / Legends / Contenders** olmak üzere 3 kademeden 24 takım
+- **Swiss (İsviçre) sistemi**: 3 galibiyet → bir üst aşamaya/play-off'a yükselme, 3 mağlubiyet → elenme
+- Aynı iki takım turnuva boyunca (mümkün olduğunca) bir daha eşleşmiyor
+- **Play-off**: Çeyrek Final → Yarı Final → Büyük Final, tek eleme usulü, BO3
+
+### Harita veto sistemi
+- **BO1 (Swiss aşaması):** Karşılıklı sırayla ban, son kalan harita oynanır
+- **BO3 (Play-off):** Gerçek CS2 Major formatı — ban / ban / pick / pick / ban / ban / decider
+
+### Maç simülasyonu
+- Round round oynanan, hızlandırılabilir (0.5x - 5x) canlı maç motoru
+- **Ekonomi sistemi**: Pistol round, eco, force buy, full buy — ve bunlar gerçekten round kazanma ihtimelini etkiliyor
+- **Rol bazlı oyuncu performansı**: Her oyuncunun bir rolü var (IGL, AWP'ci, Yıldız, Rifle'cı) ve kill dağılımı buna göre ağırlıklandırılıyor (IGL az kill alır, AWP'ci ilk rundan sonra açılır, yıldız oyuncu öne çıkar)
+- **Dinamik takım reytingi**: Sabit değil, o takımın 5 oyuncusunun skill ortalamasından hesaplanıyor + küçük bir rastgele "o günkü form" faktörü var
+- **Maç / Seri / Turnuva MVP'si** otomatik hesaplanıyor
+- Nadiren (maç başına en fazla 1 kere, düşük ihtimalle) bir oyuncunun "teknik aksaklık" yaşayıp birkaç round geride kalması
+
+### Kalıcılık
+- **Kaldığın yerden devam et**: Tarayıcının `localStorage`'ına otomatik kayıt. Sayfayı kapatıp tekrar açtığında kayıtlı turnuvana devam edebilir ya da yeni bir turnuva başlatabilirsin.
+- *Not:* Kayıt, güvenli duraklama noktalarında (round fikstürü / maç özeti / play-off serisi başı) alınıyor — canlı bir maçın tam ortasında değil. Yani en kötü ihtimalle o anki maçın vetosuna geri dönersin.
 
 ---
 
-## 🎮 Turnuva Aşamaları ve Kuralları
+## Kullanılan teknolojiler
 
-1. **Swiss Sistemi:** 3 galibiyete (3G) ulaşan takımlar üst tura yükselir, 3 mağlubiyet (3M) alan takımlar elenir.
-2. **Play-off Ağacı:** Tüm play-off serileri Best of 3 (BO3) üzerinden oynanır; 2 harita kazanan takım bir üst tura geçer.
-3. **Şampiyonluk:** Büyük Finali kazanan takım şampiyonluk podyumunda ilan edilir.
+| Katman | Ne için kullanıldı |
+|---|---|
+| **HTML** (`index.html`) | Sayfanın iskeleti: hangi kutu, hangi tablo, hangi buton nerede duruyor |
+| **CSS** (`style.css`) | Görünüm: renkler, boyutlar, yerleşim (grid/flexbox), animasyonlar (`@keyframes`) |
+| **JavaScript** (`app.js`) | Tüm mantık: takım verisi, maç simülasyonu, veto akışı, DOM güncellemeleri, kayıt sistemi |
+
+Harici bir kütüphane, framework (React/Vue vb.) veya build aracı (webpack vb.) **kullanılmıyor**. Tek bir Google Fonts bağlantısı dışında her şey bu üç dosyanın içinde.
 
 ---
 
+## Dosya yapısı
+
+```
+├── index.html    → Sayfanın iskeleti (ekranlar, tablolar, butonlar)
+├── style.css     → Görsel tasarım (renk, boyut, animasyon)
+├── app.js        → Oyunun tüm beyni (veri + mantık + DOM güncellemeleri)
+└── README.md     → Bu dosya
+```
+
+## Takım kadrolarını / isimlerini nasıl değiştiririm?
+
+`app.js` dosyasının en üstünde `const DATABASE = [ ... ]` ile başlayan bir dizi var. Her satır bir takımı temsil ediyor:
+
+```js
+{ id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", tier: 94,
+  roster: [
+    { name: "Aleksib", role: "igl" },
+    { name: "iM", role: "rifler" },
+    { name: "b1t", role: "star" },
+    { name: "w0nderful", role: "awp" },
+    { name: "jL", role: "rifler" }
+  ],
+  mapStats: { Mirage: 88, Inferno: 72, ... }
+}
+```
+
+- **`name`**: Takım adı — istediğin gibi değiştirebilirsin.
+- **`roster`**: 5 oyuncu. Her oyuncunun sadece `name` (isim) ve `role`'ünü değiştirmen yeterli, kod tarafında hiçbir şeye dokunmana gerek yok. `role` şu 4 değerden biri olmalı: `"igl"`, `"awp"`, `"star"`, `"rifler"` (bir takımda tam olarak 5 oyuncu olmalı, roller tekrar edebilir).
+- **`tier`** ve **`mapStats`**: Takımın genel gücünü ve harita bazlı performansını belirleyen sayılar (40-99 arası mantıklı). Bunlara dokunmasan da olur.
+
+---
+
+## Bilinen sınırlamalar
+
+- Takım kadroları gerçek dünyadaki güncel transferleri **otomatik takip etmiyor** — elle güncellenmesi gerekiyor.
+- "Hızlı Bitir" butonuyla bitirilen maçlarda ekonomi etkisi hesaba katılmıyor (hız için bilinçli bir basitleştirme).
+- Turnuva MVP'si sadece **senin takımının oynadığı** maçlardan hesaplanıyor; diğer eşleşmeler arka planda anlık simüle edildiği için oralarda oyuncu bazlı istatistik tutulmuyor.
+- Kayıt sistemi canlı maç sırasında değil, güvenli duraklama noktalarında çalışıyor (yukarıda açıklandı).
+
+---
+
+## Yol haritası fikirleri
+
+- [ ] Takım kartına gelince kadronun (5 oyuncu) gösterilmesi
+- [ ] Sezon/lig modu (aynı takımlarla birden fazla turnuva, tarihsel istatistik)
+- [ ] Oyuncu bazlı "kariyer" istatistikleri (turnuvalar arası kalıcı)
+- [ ] Mobil düzen iyileştirmeleri
+
+---
+
+*Bu proje eğlence ve öğrenme amaçlı yapılmıştır; Counter Strike 2 (CS2), Valve Corporation'ın tescilli markasıdır ve bu proje Valve ile bağlantılı değildir.*
