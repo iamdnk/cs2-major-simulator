@@ -1,8 +1,3 @@
-// GÜNCEL 2026 EYLÜL TRANSFER SEZONU KADROLARI (Güvenli ve Kararlı Motor)
-// NOT: "tier" alanı takımın başlangıç prestij seviyesidir (eski "rating"). Artık gerçek "rating"
-// initApp() içinde her oyuncunun rolüne göre hesaplanan skill değerlerinin ORTALAMASINDAN dinamik
-// olarak üretiliyor. Yani reyting artık sabit değil, kadroya ve biraz da o günkü forma (varyansa) bağlı.
-// role: "igl" (az kill alır, oyunu yönetir), "awp" (round 5+ açılır), "star" (en yüksek frag potansiyeli), "rifler" (standart)
 const DATABASE = [
     { id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", tier: 94, roster: [{name:"Aleksib",role:"igl"},{name:"iM",role:"rifler"},{name:"b1t",role:"star"},{name:"w0nderful",role:"awp"},{name:"jL",role:"rifler"}], mapStats: { Mirage: 88, Inferno: 72, Nuke: 94, Ancient: 80, Anubis: 76, "Dust II": 86, Vertigo: 68 } },
     { id: 2, name: "Team Vitality", pot: "legends", color: "#ffd166", tier: 93, roster: [{name:"apEX",role:"igl"},{name:"ZywOo",role:"star"},{name:"flameZ",role:"rifler"},{name:"ropz",role:"awp"},{name:"mezii",role:"rifler"}], mapStats: { Mirage: 84, Inferno: 95, Nuke: 88, Ancient: 78, Anubis: 92, "Dust II": 82, Vertigo: 65 } },
@@ -165,6 +160,8 @@ const dom = {
     resultsGrid: document.getElementById("results-cards-grid"),
     nextActionBtn: document.getElementById("next-action-btn"),
     introOverlay: document.getElementById("intro-overlay"),
+    introFlash: document.getElementById("intro-flash"),
+    soundToggleBtn: document.getElementById("sound-toggle-btn"),
     introTeamA: document.getElementById("intro-team-a"),
     introTeamB: document.getElementById("intro-team-b"),
     confettiContainer: document.getElementById("confetti-container")
@@ -172,6 +169,64 @@ const dom = {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 dom.speedSelect.addEventListener("change", (e) => { currentSpeedMultiplier = parseFloat(e.target.value); });
+
+// ==================== SES MOTORU ====================
+// Gerçek bir ses/müzik dosyası KULLANMIYORUZ. Tarayıcının kendi ses üretme özelliği olan
+// Web Audio API ile anlık ton üretiyoruz. Böylece hiçbir ekstra dosyaya ihtiyaç yok ve telif sorunu olmuyor.
+let soundEnabled = true;
+let audioCtx = null;
+function getAudioCtx() {
+    try {
+        if (!audioCtx) { const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return null; audioCtx = new Ctx(); }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+    } catch (e) { return null; }
+}
+function playTone(freq, duration, type, startTime, peakGain) {
+    if (!soundEnabled) return;
+    const ctx = getAudioCtx(); if (!ctx) return;
+    try {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = type || "sine"; osc.frequency.value = freq;
+        const t0 = ctx.currentTime + (startTime || 0);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(peakGain || 0.12, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(t0); osc.stop(t0 + duration + 0.05);
+    } catch (e) { /* ses üretilemezse sessizce geç, oyunu bozmasın */ }
+}
+function playBanSound() { playTone(320, 0.09, "square", 0, 0.07); playTone(140, 0.16, "square", 0.05, 0.08); }
+function playRoundWinSound() { playTone(880, 0.18, "triangle", 0, 0.11); playTone(1174, 0.24, "triangle", 0.09, 0.10); }
+function playRoundLoseSound() { playTone(220, 0.22, "sawtooth", 0, 0.08); playTone(150, 0.3, "sawtooth", 0.1, 0.07); }
+function playClashImpact() { playTone(90, 0.3, "square", 0, 0.13); playTone(1400, 0.08, "sine", 0, 0.06); }
+function playTensionRiser() {
+    if (!soundEnabled) return;
+    const ctx = getAudioCtx(); if (!ctx) return;
+    try {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = "sawtooth"; osc.frequency.setValueAtTime(80, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(240, ctx.currentTime + 1.7);
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.07, ctx.currentTime + 0.9);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 1.9);
+    } catch (e) {}
+}
+function playVictoryFanfare() {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => playTone(f, 0.5, "triangle", i * 0.18, 0.13));
+}
+if (dom.soundToggleBtn) {
+    dom.soundToggleBtn.onclick = () => {
+        soundEnabled = !soundEnabled;
+        dom.soundToggleBtn.textContent = soundEnabled ? "🔊" : "🔇";
+        dom.soundToggleBtn.classList.toggle("muted", !soundEnabled);
+        if (soundEnabled) getAudioCtx();
+    };
+}
+// Skor değiştiğinde çok kısa bir "pop" oynatan küçük yardımcı
+function bumpScoreEl(el) { if (!el) return; el.classList.remove("score-pop"); void el.offsetWidth; el.classList.add("score-pop"); }
 
 function initApp() {
     allTeams = JSON.parse(JSON.stringify(DATABASE));
@@ -253,6 +308,7 @@ function runSwissRound() {
 }
 
 function showFixture() {
+    saveState("fixture");
     dom.fixtureView.classList.remove("hidden"); 
     dom.vetoView.classList.add("hidden"); 
     dom.liveView.classList.add("hidden"); 
@@ -339,6 +395,110 @@ function getTopFromStore(store) {
 function seriesMvpText(mvp) { return mvp ? ` 🏆 Serinin MVP'si: ${mvp.name} (${mvp.kills} kill) — ${mvp.team}.` : ""; }
 function tournamentMvpText(mvp) { return mvp ? ` 🎖️ Turnuvandaki en golcü oyuncun: ${mvp.name} (${mvp.kills} kill, ${mvp.deaths} ölüm) — ${mvp.team}.` : ""; }
 
+// ==================== KAYIT / KALDIĞIN YERDEN DEVAM SİSTEMİ ====================
+// Sadece tarayıcının localStorage'ına yazıyoruz, hiçbir sunucu/veritabanı yok.
+// Canlı bir maçın TAM ORTASINDA (round round oynanırken) kaydetmiyoruz çünkü o anki zamanlayıcıları
+// (setTimeout'ları) saklamak mümkün değil. Onun yerine her "güvenli duraklama noktasında" kaydediyoruz:
+// bir round'un fikstürü çıktığında (henüz veto başlamadan), bir maç bittiğinde (özet ekranında) ve
+// play-off'ta bir sonraki seriye geçerken (veto başlamadan). Yani en kötü ihtimalle, tam bir maçın
+// ortasında sayfayı kapatırsan, o maçın başına (vetosuna) geri dönersin - maçın kendisini kaybetmezsin.
+const SAVE_KEY = "cs2_major_sim_save_v1";
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+function findTeamById(id) { return allTeams.find(t => t.id === id) || null; }
+function serializeBracketMatch(m) {
+    if (!m) return null;
+    return { t1: m.t1 ? m.t1.id : null, t2: m.t2 ? m.t2.id : null, winner: m.winner ? m.winner.id : null, s1: m.s1, s2: m.s2 };
+}
+function saveState(resumePhase) {
+    if (!userTeam) return;
+    try {
+        const data = {
+            v: 1, resumePhase,
+            allTeams: allTeams,
+            userTeamId: userTeam.id, userTeamName: userTeam.name,
+            currentStage, swissRound,
+            stageTeamIds: stageTeams.map(t => t.id),
+            currentMatches: currentMatches.map(m => ({ teamA: m.teamA.id, teamB: m.teamB.id, scoreA: m.scoreA, scoreB: m.scoreB, map: m.map, resolved: m.resolved })),
+            activeUserMatchIndex: activeUserMatch ? currentMatches.indexOf(activeUserMatch) : -1,
+            opponentTeamId: opponentTeam ? opponentTeam.id : null,
+            playedPairs: [...playedPairs],
+            tournamentPlayerStats, seriesPlayerStats, lastMatchMvp, lastSeriesMvp,
+            bo3Maps, bo3MapIndex, bo3UserWins, bo3OppWins, currentPlayoffIndex,
+            playoffBracket: {
+                qf: playoffBracket.qf.map(serializeBracketMatch),
+                sf: playoffBracket.sf.map(serializeBracketMatch),
+                gf: playoffBracket.gf.map(serializeBracketMatch),
+                champ: playoffBracket.champ ? playoffBracket.champ.id : null
+            }
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch (e) { /* localStorage kullanılamıyorsa (gizli sekme vb.) sessizce geç, oyunu bozma */ }
+}
+function restartTournament() { clearSave(); location.reload(); }
+
+function restoreState(data) {
+    allTeams = data.allTeams;
+    userTeam = findTeamById(data.userTeamId);
+    currentStage = data.currentStage; swissRound = data.swissRound;
+    stageTeams = data.stageTeamIds.map(id => findTeamById(id));
+    currentMatches = data.currentMatches.map(m => ({ teamA: findTeamById(m.teamA), teamB: findTeamById(m.teamB), scoreA: m.scoreA, scoreB: m.scoreB, map: m.map, resolved: m.resolved }));
+    activeUserMatch = data.activeUserMatchIndex >= 0 ? currentMatches[data.activeUserMatchIndex] : null;
+    opponentTeam = data.opponentTeamId ? findTeamById(data.opponentTeamId) : null;
+    playedPairs = new Set(data.playedPairs || []);
+    tournamentPlayerStats = data.tournamentPlayerStats || {};
+    seriesPlayerStats = data.seriesPlayerStats || {};
+    lastMatchMvp = data.lastMatchMvp || null;
+    lastSeriesMvp = data.lastSeriesMvp || null;
+    bo3Maps = data.bo3Maps || []; bo3MapIndex = data.bo3MapIndex || 0; bo3UserWins = data.bo3UserWins || 0; bo3OppWins = data.bo3OppWins || 0;
+    currentPlayoffIndex = data.currentPlayoffIndex || 0;
+    isBo3Match = data.currentStage === 3;
+
+    function restoreBracketMatch(m) { return m ? { t1: findTeamById(m.t1), t2: findTeamById(m.t2), winner: findTeamById(m.winner), s1: m.s1, s2: m.s2 } : null; }
+    playoffBracket = {
+        qf: (data.playoffBracket.qf || []).map(restoreBracketMatch),
+        sf: (data.playoffBracket.sf || []).map(restoreBracketMatch),
+        gf: (data.playoffBracket.gf || []).map(restoreBracketMatch),
+        champ: data.playoffBracket.champ ? findTeamById(data.playoffBracket.champ) : null
+    };
+
+    dom.tournScreen.classList.remove("hidden"); dom.selScreen.classList.add("hidden");
+    dom.userTeamName.textContent = userTeam.name; dom.userTeamName.style.color = userTeam.color;
+    updateUserBadge();
+
+    if (data.resumePhase === "playoff") {
+        dom.stageSubtitle.textContent = "AŞAMA 3: PLAY-OFF";
+        dom.swissLayout.classList.add("hidden"); dom.bracketView.classList.remove("hidden");
+        renderBracketTree();
+        prepareNextPlayoffUserMatch(["qf", "sf", "gf"][currentPlayoffIndex]);
+    } else {
+        dom.stageSubtitle.textContent = currentStage === 1 ? "AŞAMA 1: OPENING STAGE" : "AŞAMA 2: LEGENDS STAGE";
+        dom.swissLayout.classList.remove("hidden"); dom.bracketView.classList.add("hidden");
+        dom.swissHudBar.classList.remove("hidden"); dom.playoffBroadcastHud.classList.add("hidden");
+        dom.roundBadge.textContent = `RAUNT ${swissRound}`;
+        if (data.resumePhase === "summary") showSummary(); else showFixture();
+    }
+}
+
+function tryResumeSavedTournament() {
+    let raw = null;
+    try { raw = localStorage.getItem(SAVE_KEY); } catch (e) { return false; }
+    if (!raw) return false;
+    let data;
+    try { data = JSON.parse(raw); } catch (e) { return false; }
+    if (!data || !data.userTeamId) return false;
+
+    dom.selScreen.classList.add("hidden"); dom.tournScreen.classList.remove("hidden");
+    dom.fixtureView.classList.add("hidden"); dom.summaryView.classList.add("hidden"); dom.swissView.classList.add("hidden");
+    dom.vetoView.classList.add("hidden"); dom.liveView.classList.add("hidden");
+    dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden"); dom.bracketView.classList.add("hidden");
+
+    openModal("KALDIĞIN YERDEN DEVAM ET",
+        `Kayıtlı bir turnuvan bulundu: ${data.userTeamName}. Devam etmek mi istersin, yoksa yeni bir turnuva mı başlatmak istersin?`,
+        "Devam Et", () => { closeModal(); restoreState(data); },
+        "Yeni Turnuva Başlat", () => { clearSave(); location.reload(); });
+    return true;
+}
+
 function setVetoLog(text, isUserTurn = false, actionType = "") {
     if (!isUserTurn) {
         dom.vetoLog.innerHTML = text;
@@ -398,6 +558,7 @@ function opponentBanBO1() {
     if (remainingMaps.length <= 1) return;
     let worst = getWorstMap(opponentTeam, userTeam);
     remainingMaps.splice(remainingMaps.indexOf(worst), 1);
+    playBanSound();
     dom.vetoTurn.textContent = "Senin Sıran"; isUserVetoTurn = true;
     setVetoLog("", true, "ban");
     renderVetoMaps();
@@ -407,6 +568,7 @@ function opponentBanBO1() {
 function userBanBO1(map) {
     if (!isUserVetoTurn) return;
     isUserVetoTurn = false; remainingMaps.splice(remainingMaps.indexOf(map), 1);
+    playBanSound();
     dom.vetoTurn.textContent = "Rakipte"; setVetoLog(`Rakip düşünüyor...`);
     renderVetoMaps();
     if (remainingMaps.length > 1) setTimeout(opponentBanBO1, 700); else endBO1Veto();
@@ -422,6 +584,7 @@ function endBO1Veto() {
 function opponentVetoStepBO3() {
     if (vetoStep === 0 || vetoStep === 4) {
         let worst = getWorstMap(opponentTeam, userTeam); remainingMaps.splice(remainingMaps.indexOf(worst), 1);
+        playBanSound();
     } else if (vetoStep === 2) {
         let best = getBestMap(opponentTeam, userTeam); bo3Maps.push(best); remainingMaps.splice(remainingMaps.indexOf(best), 1);
     }
@@ -433,7 +596,7 @@ function opponentVetoStepBO3() {
 function userVetoActionBO3(map) {
     if (!isUserVetoTurn) return;
     isUserVetoTurn = false;
-    if (vetoStep === 1 || vetoStep === 5) { remainingMaps.splice(remainingMaps.indexOf(map), 1); } 
+    if (vetoStep === 1 || vetoStep === 5) { remainingMaps.splice(remainingMaps.indexOf(map), 1); playBanSound(); } 
     else if (vetoStep === 3) { bo3Maps.push(map); remainingMaps.splice(remainingMaps.indexOf(map), 1); }
     vetoStep++; renderVetoMaps();
     if (vetoStep < 6) { dom.vetoTurn.textContent = "Rakipte"; setVetoLog(`Rakip düşünüyor...`); setTimeout(opponentVetoStepBO3, 800); } 
@@ -481,6 +644,7 @@ function getPlayerWeight(p, roundNumber) {
     if (p.role === "igl") w *= 0.55;
     if (p.role === "star") w *= 1.25;
     if (p.role === "awp") w *= (roundNumber <= 4 ? 0.7 : 1.2);
+    if (p.glitchRoundsLeft > 0) w *= 0.35; // teknik aksaklık yaşıyor, geçici olarak geride kalıyor
     return Math.max(w, 5);
 }
 function weightedPick(roster, roundNumber) {
@@ -539,13 +703,14 @@ function startLiveMatch() {
 
     if (isBo3Match && bo3MapIndex > 0) { setupMatchUI(); return; }
 
-    dom.introOverlay.classList.remove("hidden", "fade-out", "clash-shake");
+    dom.introOverlay.classList.remove("hidden", "fade-out", "clash-impact");
     dom.introOverlay.style.background = `linear-gradient(135deg, ${tA.color}33 0%, #05070a 50%, ${tB.color}33 100%)`;
     
     dom.introTeamA.textContent = tA.name; dom.introTeamA.style.setProperty("--team-color", tA.color);
     dom.introTeamB.textContent = tB.name; dom.introTeamB.style.setProperty("--team-color", tB.color);
 
-    setTimeout(() => { dom.introOverlay.classList.add("clash-shake"); }, 500);
+    playTensionRiser();
+    setTimeout(() => { dom.introOverlay.classList.add("clash-impact"); playClashImpact(); }, 500);
     setTimeout(() => { dom.introOverlay.classList.add("fade-out"); setTimeout(() => { dom.introOverlay.classList.add("hidden"); }, 600); setupMatchUI(); }, 2400); 
 }
 
@@ -563,6 +728,24 @@ dom.livePlayBtn.onclick = () => {
     // şansını gerçekten kaybediyor artık (eskiden ekonomi sadece görsel bir etiketti).
     const BUY_STRENGTH = { "TABANCA": 1, "ECO": 0.72, "FORCE BUY": 0.87, "FULL BUY": 1 };
     let sA = 0, sB = 0, r = 1, target = 13; matchIsRunning = true;
+    let glitchUsedThisMatch = false; // Bir maçta en fazla 1 kere: bir oyuncunun bilgisayarında/bağlantısında sorun çıkabilir
+
+    function maybeTriggerGlitchEvent() {
+        if (glitchUsedThisMatch || r <= 2 || Math.random() >= 0.02) return;
+        glitchUsedThisMatch = true;
+        let inRosterA = Math.random() < 0.5;
+        let pool = inRosterA ? currentRosterA : currentRosterB;
+        let victim = pool[Math.floor(Math.random() * pool.length)];
+        victim.glitchRoundsLeft = 2;
+        let victimTeam = inRosterA ? tA : tB;
+        let row = document.createElement("div"); row.className = "ticker-row ticker-in"; row.style.borderLeftColor = "#f97316";
+        row.innerHTML = `<span class="ticker-event">⚠️ ${victim.name}'ın bilgisayarında/bağlantısında teknik bir sorun oluştu, birkaç round performansı düşebilir</span><span class="ticker-round-badge" style="background:#f97316; color:#0b0e14;">R${r}</span><span class="ticker-opp" style="color:${victimTeam.color}">${victimTeam.name}</span>`;
+        dom.tickerFeed.prepend(row);
+    }
+    function tickGlitchCounters() {
+        currentRosterA.forEach(p => { if (p.glitchRoundsLeft > 0) p.glitchRoundsLeft--; });
+        currentRosterB.forEach(p => { if (p.glitchRoundsLeft > 0) p.glitchRoundsLeft--; });
+    }
 
     function playRound() {
         if (!matchIsRunning) return;
@@ -582,6 +765,8 @@ dom.livePlayBtn.onclick = () => {
         let win = Math.random() < roundProbA ? tA : tB, loser = (win === tA) ? tB : tA;
         let isEcoWin = false;
         
+        maybeTriggerGlitchEvent();
+
         if (win === tA) { 
             if (dom.ecoTeamA.textContent === "ECO" && dom.ecoTeamB.textContent === "FULL BUY") isEcoWin = true;
             sA++; distributeStats(currentRosterA, currentRosterB, r); updateEconomy(ecoA, ecoB); 
@@ -589,8 +774,10 @@ dom.livePlayBtn.onclick = () => {
             if (dom.ecoTeamB.textContent === "ECO" && dom.ecoTeamA.textContent === "FULL BUY") isEcoWin = true;
             sB++; distributeStats(currentRosterB, currentRosterA, r); updateEconomy(ecoB, ecoA); 
         }
+        tickGlitchCounters();
 
         dom.sbScoreA.textContent = sA; dom.sbScoreB.textContent = sB;
+        bumpScoreEl(dom.sbScoreA); bumpScoreEl(dom.sbScoreB);
         renderScoreboard(tA, currentRosterA, tB, currentRosterB, sA, sB);
 
         let winningRoster = (win === tA) ? currentRosterA : currentRosterB;
@@ -604,16 +791,18 @@ dom.livePlayBtn.onclick = () => {
                     .replace("{player}", mvpPlayer.name)
                     .replace("{team}", win.name);
 
-        let row = document.createElement("div"); row.className = "ticker-row"; row.style.borderLeftColor = win.color;
+        let row = document.createElement("div"); row.className = "ticker-row ticker-in"; row.style.borderLeftColor = win.color;
         row.innerHTML = `<span class="ticker-event">${ev}</span><span class="ticker-round-badge" style="background:${win.color}; color:#0b0e14; box-shadow: 0 0 10px ${win.color}88;">R${r}</span><span class="ticker-opp" style="color:${loser.color}">${loser.name}</span>`;
         dom.tickerFeed.prepend(row);
 
         if (sA === target - 1 && sB === target - 1) {
-            target += 3; let ot = document.createElement("div"); ot.className = "ticker-row ticker-ot"; ot.textContent = `UZATMALAR (MR3) - YENİ HEDEF: ${target}`; dom.tickerFeed.prepend(ot);
+            target += 3; let ot = document.createElement("div"); ot.className = "ticker-row ticker-ot ticker-in"; ot.textContent = `UZATMALAR (MR3) - YENİ HEDEF: ${target}`; dom.tickerFeed.prepend(ot);
         }
 
         if (sA === target || sB === target) {
             matchIsRunning = false; lastRosterA = currentRosterA; lastRosterB = currentRosterB;
+            let userWonMatch = (sA > sB) === (tA === userTeam);
+            if (tA === userTeam || tB === userTeam) { if (userWonMatch) playRoundWinSound(); else playRoundLoseSound(); }
             dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden"); return;
         }
         r++; let baseDelay = 1100; matchTimer = setTimeout(playRound, baseDelay / currentSpeedMultiplier);
@@ -632,6 +821,7 @@ dom.livePlayBtn.onclick = () => {
         }
         lastRosterA = currentRosterA; lastRosterB = currentRosterB;
         dom.sbScoreA.textContent = sA; dom.sbScoreB.textContent = sB; renderScoreboard(tA, currentRosterA, tB, currentRosterB, sA, sB);
+        if ((sA > sB) === (tA === userTeam)) playRoundWinSound(); else playRoundLoseSound();
         dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden");
     };
 };
@@ -671,6 +861,7 @@ function simulateOtherMatchesInstantly() {
 }
 
 function showSummary() {
+    saveState("summary");
     dom.liveView.classList.add("hidden"); 
     dom.summaryView.classList.remove("hidden"); 
     dom.swissView.classList.remove("hidden");
@@ -700,7 +891,7 @@ function checkStageEnd() {
 
     if (userElim) {
         dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden"); dom.swissLayout.classList.add("hidden");
-        openModal("ELENDİNİZ", `${userTeam.name} 3 mağlubiyet alarak turnuvaya veda etti.${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
+        openModal("ELENDİNİZ", `${userTeam.name} 3 mağlubiyet alarak turnuvaya veda etti.${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => restartTournament(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
     }
     if (userAdv) {
         finishSwissStage(stageTeams, currentStage === 1 ? "adv_opening" : "adv_playoffs", currentStage === 1 ? "elm_opening" : "elm_playoffs");
@@ -801,6 +992,7 @@ function prepareNextPlayoffUserMatch(roundKey) {
     if (!match) return;
     opponentTeam = match.t1.id === userTeam.id ? match.t2 : match.t1;
     bo3UserWins = 0; bo3OppWins = 0; seriesPlayerStats = {}; chosenMap = null; updatePlayoffBroadcastHUD();
+    saveState("playoff");
     let stageName = roundKey === "qf" ? "ÇEYREK FİNAL" : (roundKey === "sf" ? "YARI FİNAL" : "BÜYÜK FİNAL");
     openModal(`${stageName} (BO3)`, `${userTeam.name} vs ${opponentTeam.name}${seriesMvpText(lastSeriesMvp)}`, "Harita Vetosuna Başla", () => { closeModal(); dom.bracketView.classList.add("hidden"); dom.swissLayout.classList.remove("hidden"); startVeto(); });
 }
@@ -812,6 +1004,7 @@ function simBo3Between(tA, tB) {
 }
 
 function triggerConfetti() {
+    playVictoryFanfare();
     dom.confettiContainer.innerHTML = "";
     for(let i=0; i<150; i++) {
         let conf = document.createElement("div"); conf.className = "confetti";
@@ -829,12 +1022,12 @@ function onBo3SeriesResolved(userWon) {
         if (currentPlayoffIndex === 2) {
             playoffBracket.gf[0].winner = opponentTeam; playoffBracket.gf[0].s1 = playoffBracket.gf[0].t1.id === opponentTeam.id ? 2 : bo3UserWins; playoffBracket.gf[0].s2 = playoffBracket.gf[0].t2.id === opponentTeam.id ? 2 : bo3UserWins;
             playoffBracket.champ = opponentTeam; renderBracketTree(); triggerConfetti();
-            openModal(`${opponentTeam.name.toUpperCase()} ŞAMPİYON!`, `${opponentTeam.name} büyük final serisini ${bo3OppWins}-${bo3UserWins} kazanarak Major Şampiyonu oldu!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload()); return;
+            openModal(`${opponentTeam.name.toUpperCase()} ŞAMPİYON!`, `${opponentTeam.name} büyük final serisini ${bo3OppWins}-${bo3UserWins} kazanarak Major Şampiyonu oldu!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => restartTournament()); return;
         }
         if (currentPlayoffIndex === 0) { let userQF = playoffBracket.qf.find(m => m.t1.id === userTeam.id || m.t2.id === userTeam.id); userQF.winner = opponentTeam; userQF.s1 = userQF.t1.id === opponentTeam.id ? 2 : bo3UserWins; userQF.s2 = userQF.t2.id === opponentTeam.id ? 2 : bo3UserWins; }
         else if (currentPlayoffIndex === 1) { let userSF = playoffBracket.sf.find(m => m.t1 && m.t2 && (m.t1.id === userTeam.id || m.t2.id === userTeam.id)); userSF.winner = opponentTeam; userSF.s1 = userSF.t1.id === opponentTeam.id ? 2 : bo3UserWins; userSF.s2 = userSF.t2.id === opponentTeam.id ? 2 : bo3UserWins; }
         renderBracketTree(); let stageTxt = currentPlayoffIndex === 0 ? "Çeyrek finalde" : "Yarı finalde";
-        openModal("ELENDİNİZ", `${stageTxt} ${opponentTeam.name} takımına mağlup oldunuz.${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
+        openModal("ELENDİNİZ", `${stageTxt} ${opponentTeam.name} takımına mağlup oldunuz.${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => restartTournament(), "Kalanı Simüle Et", () => autoSimulateToEnd()); return;
     }
     if (currentPlayoffIndex === 0) {
         let userQF = playoffBracket.qf.find(m => m.t1.id === userTeam.id || m.t2.id === userTeam.id); userQF.winner = userTeam; userQF.s1 = userQF.t1.id === userTeam.id ? 2 : bo3OppWins; userQF.s2 = userQF.t2.id === userTeam.id ? 2 : bo3OppWins;
@@ -848,11 +1041,12 @@ function onBo3SeriesResolved(userWon) {
     } else if (currentPlayoffIndex === 2) {
         dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden"); dom.swissLayout.classList.add("hidden");
         playoffBracket.gf[0].winner = userTeam; playoffBracket.gf[0].s1 = 2; playoffBracket.gf[0].s2 = bo3OppWins; playoffBracket.champ = userTeam; renderBracketTree(); triggerConfetti();
-        openModal(`${userTeam.name.toUpperCase()} ŞAMPİYON!`, `Muazzam bir performansla CS2 Major Kupasını müzenize götürdünüz! Tebrikler!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => location.reload());
+        openModal(`${userTeam.name.toUpperCase()} ŞAMPİYON!`, `Muazzam bir performansla CS2 Major Kupasını müzenize götürdünüz! Tebrikler!${seriesMvpText(lastSeriesMvp)}${tournamentMvpText(getTopFromStore(tournamentPlayerStats))}`, "Yeniden Başlat", () => restartTournament());
     }
 }
 
 async function autoSimulateToEnd() {
+    clearSave();
     closeModal(); dom.swissLayout.classList.add("hidden"); dom.bracketView.classList.remove("hidden");
     dom.stageSubtitle.textContent = "AŞAMA 3: PLAY-OFF (CANLI SİMÜLASYON)"; dom.swissHudBar.classList.add("hidden"); dom.playoffBroadcastHud.classList.add("hidden");
     if (currentStage === 1) {
@@ -875,7 +1069,7 @@ async function animatePlayoffsStepByStep() {
     for (let i = 0; i < playoffBracket.sf.length; i++) { let m = playoffBracket.sf[i]; if (!m.winner && m.t1 && m.t2) { renderBracketTree(i, "sf"); await sleep(750); let res = simBo3Between(m.t1, m.t2); m.winner = res.winner; m.s1 = res.s1; m.s2 = res.s2; renderBracketTree(-1, ""); await sleep(350); } }
     if (!playoffBracket.gf[0].t1) playoffBracket.gf[0].t1 = playoffBracket.sf[0].winner; if (!playoffBracket.gf[0].t2) playoffBracket.gf[0].t2 = playoffBracket.sf[1].winner; renderBracketTree(-1, ""); await sleep(800);
     let gf = playoffBracket.gf[0]; if (!gf.winner && gf.t1 && gf.t2) { renderBracketTree(0, "gf"); await sleep(900); let res = simBo3Between(gf.t1, gf.t2); gf.winner = res.winner; gf.s1 = res.s1; gf.s2 = res.s2; playoffBracket.champ = res.winner; renderBracketTree(-1, ""); await sleep(600); }
-    triggerConfetti(); openModal(`${playoffBracket.champ.name.toUpperCase()} ŞAMPİYON!`, `${playoffBracket.champ.name} büyük finali kazanarak CS2 Major Kupasını kaldırdı!`, "Başa Dön", () => location.reload());
+    triggerConfetti(); openModal(`${playoffBracket.champ.name.toUpperCase()} ŞAMPİYON!`, `${playoffBracket.champ.name} büyük finali kazanarak CS2 Major Kupasını kaldırdı!`, "Başa Dön", () => restartTournament());
 }
 
 function openModal(title, desc, btnText, callback, secBtnTest = null, secCallback = null) {
@@ -889,4 +1083,4 @@ function openModal(title, desc, btnText, callback, secBtnTest = null, secCallbac
 
 function closeModal() { dom.bannerModal.classList.add("hidden"); dom.regularSummary.classList.remove("hidden"); dom.summaryView.classList.add("hidden"); }
 
-initApp();
+if (!tryResumeSavedTournament()) { initApp(); }
