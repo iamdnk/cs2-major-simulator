@@ -1,3 +1,8 @@
+// GÜNCEL 2026 EYLÜL TRANSFER SEZONU KADROLARI (Güvenli ve Kararlı Motor)
+// NOT: "tier" alanı takımın başlangıç prestij seviyesidir (eski "rating"). Artık gerçek "rating"
+// initApp() içinde her oyuncunun rolüne göre hesaplanan skill değerlerinin ORTALAMASINDAN dinamik
+// olarak üretiliyor. Yani reyting artık sabit değil, kadroya ve biraz da o günkü forma (varyansa) bağlı.
+// role: "igl" (az kill alır, oyunu yönetir), "awp" (round 5+ açılır), "star" (en yüksek frag potansiyeli), "rifler" (standart)
 const DATABASE = [
     { id: 1, name: "Natus Vincere", pot: "legends", color: "#ffee00", tier: 94, roster: [{name:"Aleksib",role:"igl"},{name:"iM",role:"rifler"},{name:"b1t",role:"star"},{name:"w0nderful",role:"awp"},{name:"jL",role:"rifler"}], mapStats: { Mirage: 88, Inferno: 72, Nuke: 94, Ancient: 80, Anubis: 76, "Dust II": 86, Vertigo: 68 } },
     { id: 2, name: "Team Vitality", pot: "legends", color: "#ffd166", tier: 93, roster: [{name:"apEX",role:"igl"},{name:"ZywOo",role:"star"},{name:"flameZ",role:"rifler"},{name:"ropz",role:"awp"},{name:"mezii",role:"rifler"}], mapStats: { Mirage: 84, Inferno: 95, Nuke: 88, Ancient: 78, Anubis: 92, "Dust II": 82, Vertigo: 65 } },
@@ -161,7 +166,6 @@ const dom = {
     nextActionBtn: document.getElementById("next-action-btn"),
     introOverlay: document.getElementById("intro-overlay"),
     introFlash: document.getElementById("intro-flash"),
-    soundToggleBtn: document.getElementById("sound-toggle-btn"),
     introTeamA: document.getElementById("intro-team-a"),
     introTeamB: document.getElementById("intro-team-b"),
     confettiContainer: document.getElementById("confetti-container")
@@ -170,61 +174,6 @@ const dom = {
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 dom.speedSelect.addEventListener("change", (e) => { currentSpeedMultiplier = parseFloat(e.target.value); });
 
-// ==================== SES MOTORU ====================
-// Gerçek bir ses/müzik dosyası KULLANMIYORUZ. Tarayıcının kendi ses üretme özelliği olan
-// Web Audio API ile anlık ton üretiyoruz. Böylece hiçbir ekstra dosyaya ihtiyaç yok ve telif sorunu olmuyor.
-let soundEnabled = true;
-let audioCtx = null;
-function getAudioCtx() {
-    try {
-        if (!audioCtx) { const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return null; audioCtx = new Ctx(); }
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        return audioCtx;
-    } catch (e) { return null; }
-}
-function playTone(freq, duration, type, startTime, peakGain) {
-    if (!soundEnabled) return;
-    const ctx = getAudioCtx(); if (!ctx) return;
-    try {
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = type || "sine"; osc.frequency.value = freq;
-        const t0 = ctx.currentTime + (startTime || 0);
-        gain.gain.setValueAtTime(0.0001, t0);
-        gain.gain.linearRampToValueAtTime(peakGain || 0.12, t0 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(t0); osc.stop(t0 + duration + 0.05);
-    } catch (e) { /* ses üretilemezse sessizce geç, oyunu bozmasın */ }
-}
-function playBanSound() { playTone(320, 0.09, "square", 0, 0.07); playTone(140, 0.16, "square", 0.05, 0.08); }
-function playRoundWinSound() { playTone(880, 0.18, "triangle", 0, 0.11); playTone(1174, 0.24, "triangle", 0.09, 0.10); }
-function playRoundLoseSound() { playTone(220, 0.22, "sawtooth", 0, 0.08); playTone(150, 0.3, "sawtooth", 0.1, 0.07); }
-function playClashImpact() { playTone(90, 0.3, "square", 0, 0.13); playTone(1400, 0.08, "sine", 0, 0.06); }
-function playTensionRiser() {
-    if (!soundEnabled) return;
-    const ctx = getAudioCtx(); if (!ctx) return;
-    try {
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = "sawtooth"; osc.frequency.setValueAtTime(80, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(240, ctx.currentTime + 1.7);
-        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.07, ctx.currentTime + 0.9);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 1.9);
-    } catch (e) {}
-}
-function playVictoryFanfare() {
-    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => playTone(f, 0.5, "triangle", i * 0.18, 0.13));
-}
-if (dom.soundToggleBtn) {
-    dom.soundToggleBtn.onclick = () => {
-        soundEnabled = !soundEnabled;
-        dom.soundToggleBtn.textContent = soundEnabled ? "🔊" : "🔇";
-        dom.soundToggleBtn.classList.toggle("muted", !soundEnabled);
-        if (soundEnabled) getAudioCtx();
-    };
-}
 // Skor değiştiğinde çok kısa bir "pop" oynatan küçük yardımcı
 function bumpScoreEl(el) { if (!el) return; el.classList.remove("score-pop"); void el.offsetWidth; el.classList.add("score-pop"); }
 
@@ -558,7 +507,6 @@ function opponentBanBO1() {
     if (remainingMaps.length <= 1) return;
     let worst = getWorstMap(opponentTeam, userTeam);
     remainingMaps.splice(remainingMaps.indexOf(worst), 1);
-    playBanSound();
     dom.vetoTurn.textContent = "Senin Sıran"; isUserVetoTurn = true;
     setVetoLog("", true, "ban");
     renderVetoMaps();
@@ -568,7 +516,6 @@ function opponentBanBO1() {
 function userBanBO1(map) {
     if (!isUserVetoTurn) return;
     isUserVetoTurn = false; remainingMaps.splice(remainingMaps.indexOf(map), 1);
-    playBanSound();
     dom.vetoTurn.textContent = "Rakipte"; setVetoLog(`Rakip düşünüyor...`);
     renderVetoMaps();
     if (remainingMaps.length > 1) setTimeout(opponentBanBO1, 700); else endBO1Veto();
@@ -584,7 +531,6 @@ function endBO1Veto() {
 function opponentVetoStepBO3() {
     if (vetoStep === 0 || vetoStep === 4) {
         let worst = getWorstMap(opponentTeam, userTeam); remainingMaps.splice(remainingMaps.indexOf(worst), 1);
-        playBanSound();
     } else if (vetoStep === 2) {
         let best = getBestMap(opponentTeam, userTeam); bo3Maps.push(best); remainingMaps.splice(remainingMaps.indexOf(best), 1);
     }
@@ -596,7 +542,7 @@ function opponentVetoStepBO3() {
 function userVetoActionBO3(map) {
     if (!isUserVetoTurn) return;
     isUserVetoTurn = false;
-    if (vetoStep === 1 || vetoStep === 5) { remainingMaps.splice(remainingMaps.indexOf(map), 1); playBanSound(); } 
+    if (vetoStep === 1 || vetoStep === 5) { remainingMaps.splice(remainingMaps.indexOf(map), 1); } 
     else if (vetoStep === 3) { bo3Maps.push(map); remainingMaps.splice(remainingMaps.indexOf(map), 1); }
     vetoStep++; renderVetoMaps();
     if (vetoStep < 6) { dom.vetoTurn.textContent = "Rakipte"; setVetoLog(`Rakip düşünüyor...`); setTimeout(opponentVetoStepBO3, 800); } 
@@ -709,8 +655,7 @@ function startLiveMatch() {
     dom.introTeamA.textContent = tA.name; dom.introTeamA.style.setProperty("--team-color", tA.color);
     dom.introTeamB.textContent = tB.name; dom.introTeamB.style.setProperty("--team-color", tB.color);
 
-    playTensionRiser();
-    setTimeout(() => { dom.introOverlay.classList.add("clash-impact"); playClashImpact(); }, 500);
+    setTimeout(() => { dom.introOverlay.classList.add("clash-impact"); }, 500);
     setTimeout(() => { dom.introOverlay.classList.add("fade-out"); setTimeout(() => { dom.introOverlay.classList.add("hidden"); }, 600); setupMatchUI(); }, 2400); 
 }
 
@@ -801,8 +746,6 @@ dom.livePlayBtn.onclick = () => {
 
         if (sA === target || sB === target) {
             matchIsRunning = false; lastRosterA = currentRosterA; lastRosterB = currentRosterB;
-            let userWonMatch = (sA > sB) === (tA === userTeam);
-            if (tA === userTeam || tB === userTeam) { if (userWonMatch) playRoundWinSound(); else playRoundLoseSound(); }
             dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden"); return;
         }
         r++; let baseDelay = 1100; matchTimer = setTimeout(playRound, baseDelay / currentSpeedMultiplier);
@@ -821,7 +764,6 @@ dom.livePlayBtn.onclick = () => {
         }
         lastRosterA = currentRosterA; lastRosterB = currentRosterB;
         dom.sbScoreA.textContent = sA; dom.sbScoreB.textContent = sB; renderScoreboard(tA, currentRosterA, tB, currentRosterB, sA, sB);
-        if ((sA > sB) === (tA === userTeam)) playRoundWinSound(); else playRoundLoseSound();
         dom.liveSkipBtn.classList.add("hidden"); dom.livePlayBtn.textContent = "Sonuçlara Geç"; dom.livePlayBtn.disabled = false; dom.livePlayBtn.classList.remove("hidden");
     };
 };
@@ -1004,7 +946,6 @@ function simBo3Between(tA, tB) {
 }
 
 function triggerConfetti() {
-    playVictoryFanfare();
     dom.confettiContainer.innerHTML = "";
     for(let i=0; i<150; i++) {
         let conf = document.createElement("div"); conf.className = "confetti";
